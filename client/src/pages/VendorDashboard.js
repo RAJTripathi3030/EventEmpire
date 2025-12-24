@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Container, Form, Button, Card, Row, Col, Alert, Tab, Nav, Image, Modal } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col, Alert, Tab, Nav, Card, Modal, Image, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import Messages from './Messages'; // Reusing Messages component
+import Messages from './Messages';
 
 const VendorDashboard = () => {
     const [profile, setProfile] = useState(null);
@@ -80,44 +80,51 @@ const VendorDashboard = () => {
     };
 
     return (
-        <Container className="mt-4">
-            <h2 className="mb-4">Vendor Dashboard</h2>
-            {message && (
-                <Alert variant={message.type} onClose={() => setMessage(null)} dismissible>
-                    {message.text}
-                </Alert>
-            )}
+        <div className="py-5" style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+            <Container>
+                <div className="mb-5 border-bottom border-warning pb-3">
+                    <h2 className="display-5 fw-bold" style={{ color: 'var(--royal-accent)', fontFamily: 'Playfair Display' }}>
+                        Vendor Dashboard
+                    </h2>
+                    <p className="text-secondary">Manage your profile, portfolio, and view client inquiries.</p>
+                </div>
 
-            <Tab.Container defaultActiveKey="profile">
-                <Nav variant="tabs" className="mb-3">
-                    <Nav.Item>
-                        <Nav.Link eventKey="profile">Profile</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link eventKey="inquiries">Inquiries</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link eventKey="portfolio">Portfolio</Nav.Link>
-                    </Nav.Item>
-                </Nav>
+                {message && (
+                    <Alert variant={message.type} onClose={() => setMessage(null)} dismissible className="glass-card border-0 mb-4 shadow-sm">
+                        {message.text}
+                    </Alert>
+                )}
 
-                <Tab.Content>
-                    <Tab.Pane eventKey="profile">
-                        <Row>
-                            <Col md={8}>
-                                <Card className="shadow-sm">
-                                    <Card.Body>
+                <Tab.Container defaultActiveKey="profile">
+                    <Nav variant="pills" className="mb-4 glass-nav p-2 rounded justify-content-center bg-white shadow-sm">
+                        <Nav.Item>
+                            <Nav.Link eventKey="profile" className="text-dark fw-bold mx-2">Profile</Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey="inquiries" className="text-dark fw-bold mx-2">Inquiries</Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey="portfolio" className="text-dark fw-bold mx-2">Portfolio</Nav.Link>
+                        </Nav.Item>
+                    </Nav>
+
+                    <Tab.Content>
+                        <Tab.Pane eventKey="profile">
+                            <Row>
+                                <Col md={10} className="mx-auto">
+                                    <div className="glass-card p-4 bg-white text-dark shadow-lg">
                                         {!profile && !isEditing && (
-                                            <Alert variant="info">You haven't set up your profile yet.</Alert>
+                                            <Alert variant="info" className="border-info text-info bg-light">You haven't set up your profile yet. Click Edit to start.</Alert>
                                         )}
 
                                         {isEditing ? (
                                             <Form>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>Service Type</Form.Label>
+                                                    <Form.Label className="fw-bold small text-muted">Service Type</Form.Label>
                                                     <Form.Select
                                                         value={formData.serviceType}
                                                         onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
+                                                        className="form-control-glass bg-light"
                                                     >
                                                         <option value="">Select Service Type</option>
                                                         <option value="Catering">Catering</option>
@@ -129,103 +136,143 @@ const VendorDashboard = () => {
                                                     </Form.Select>
                                                 </Form.Group>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>Location</Form.Label>
+                                                    <Form.Label className="fw-bold small text-muted">Location</Form.Label>
                                                     <Form.Control
                                                         type="text"
                                                         value={formData.location}
                                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                                        className="form-control-glass bg-light"
                                                     />
                                                 </Form.Group>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>Pricing</Form.Label>
+                                                    <Form.Label className="fw-bold small text-muted">Pricing</Form.Label>
                                                     <Form.Control
                                                         type="text"
                                                         value={formData.pricing}
                                                         onChange={(e) => setFormData({ ...formData, pricing: e.target.value })}
+                                                        placeholder="e.g. Starts at ₹50,000"
+                                                        className="form-control-glass bg-light"
                                                     />
                                                 </Form.Group>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>Description</Form.Label>
+                                                    <Form.Label className="fw-bold small text-muted">Description</Form.Label>
                                                     <Form.Control
                                                         as="textarea"
                                                         rows={3}
                                                         value={formData.description}
                                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                                        placeholder="Describe your services..."
+                                                        placeholder="Describe your services, package details, etc."
+                                                        className="form-control-glass bg-light"
                                                     />
                                                 </Form.Group>
-                                                <Button variant="success" onClick={handleSave} className="me-2">
-                                                    Save Profile
-                                                </Button>
-                                                <Button variant="secondary" onClick={() => setIsEditing(false)}>
-                                                    Cancel
-                                                </Button>
+                                                <div className="d-flex gap-2">
+                                                    <Button className="btn-royal-gold" onClick={handleSave}>
+                                                        Save Profile
+                                                    </Button>
+                                                    <Button variant="outline-dark" onClick={() => setIsEditing(false)}>
+                                                        Cancel
+                                                    </Button>
+                                                </div>
                                             </Form>
                                         ) : (
                                             <div>
-                                                <p><strong>Service Type:</strong> {profile?.serviceType || 'N/A'}</p>
-                                                <p><strong>Location:</strong> {profile?.location || 'N/A'}</p>
-                                                <p><strong>Pricing:</strong> {profile?.pricing || 'N/A'}</p>
-                                                <p><strong>Description:</strong> {profile?.description || 'N/A'}</p>
-                                                <p><strong>Pricing:</strong> {profile?.pricing || 'N/A'}</p>
-                                                <Button variant="primary" onClick={() => setIsEditing(true)}>
-                                                    Edit Profile
-                                                </Button>
+                                                <div className="d-flex justify-content-between align-items-start mb-4">
+                                                    <h3 style={{ color: 'var(--gold-primary)' }} className="fw-bold">Business Profile</h3>
+                                                    <Button className="btn-glass text-dark border-secondary" onClick={() => setIsEditing(true)}>
+                                                        <i className="bi bi-pencil me-2"></i> Edit Profile
+                                                    </Button>
+                                                </div>
+                                                <Row className="gy-4">
+                                                    <Col md={6}>
+                                                        <div className="p-3 rounded bg-light border-start border-4 border-warning">
+                                                            <p className="mb-1 text-muted small fw-bold text-uppercase">Service Type</p>
+                                                            <p className="fs-5 fw-bold text-dark mb-0">{profile?.serviceType || 'N/A'}</p>
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <div className="p-3 rounded bg-light border-start border-4 border-warning">
+                                                            <p className="mb-1 text-muted small fw-bold text-uppercase">Location</p>
+                                                            <p className="fs-5 fw-bold text-dark mb-0">{profile?.location || 'N/A'}</p>
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={12}>
+                                                        <div className="p-3 rounded bg-light border-start border-4 border-warning">
+                                                            <p className="mb-1 text-muted small fw-bold text-uppercase">Pricing</p>
+                                                            <p className="fs-5 fw-bold text-dark mb-0">{profile?.pricing || 'N/A'}</p>
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={12}>
+                                                        <div className="mt-2">
+                                                            <p className="mb-2 text-warning fw-bold"><i className="bi bi-file-text me-2"></i> Description</p>
+                                                            <p className="fs-5 text-secondary">{profile?.description || 'N/A'}</p>
+                                                        </div>
+                                                    </Col>
+                                                </Row>
                                             </div>
                                         )}
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        </Row>
-                    </Tab.Pane>
-
-                    <Tab.Pane eventKey="inquiries">
-                        <Messages />
-                    </Tab.Pane>
-
-                    <Tab.Pane eventKey="portfolio">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h4>My Portfolio</h4>
-                            <Button onClick={() => setShowImageModal(true)}>Add Image</Button>
-                        </div>
-                        <Row xs={1} md={3} className="g-4">
-                            {profile?.portfolio?.map((img, idx) => (
-                                <Col key={idx}>
-                                    <Card>
-                                        <Card.Img variant="top" src={img} style={{ height: '200px', objectFit: 'cover' }} />
-                                    </Card>
+                                    </div>
                                 </Col>
-                            ))}
-                        </Row>
-                        {(!profile?.portfolio || profile.portfolio.length === 0) && (
-                            <p className="text-muted">No images in portfolio yet.</p>
-                        )}
-                    </Tab.Pane>
-                </Tab.Content>
-            </Tab.Container>
+                            </Row>
+                        </Tab.Pane>
 
-            {/* Add Image Modal */}
-            <Modal show={showImageModal} onHide={() => setShowImageModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Add Portfolio Image</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group>
-                        <Form.Label>Image URL</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="https://example.com/image.jpg"
-                            value={newImage}
-                            onChange={(e) => setNewImage(e.target.value)}
-                        />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowImageModal(false)}>Cancel</Button>
-                    <Button variant="primary" onClick={handleAddImage}>Add</Button>
-                </Modal.Footer>
-            </Modal>
-        </Container>
+                        <Tab.Pane eventKey="inquiries">
+                            <div className="glass-card p-4 bg-white shadow-lg">
+                                <Messages />
+                            </div>
+                        </Tab.Pane>
+
+                        <Tab.Pane eventKey="portfolio">
+                            <div className="d-flex justify-content-between align-items-center mb-4 text-dark">
+                                <h3 className="fw-bold" style={{ color: 'var(--royal-accent)' }}>My Portfolio</h3>
+                                <Button className="btn-royal-gold" onClick={() => setShowImageModal(true)}>
+                                    <i className="bi bi-plus-lg me-2"></i> Add Image
+                                </Button>
+                            </div>
+                            <Row xs={1} md={3} className="g-4">
+                                {profile?.portfolio?.map((img, idx) => (
+                                    <Col key={idx}>
+                                        <div className="glass-card p-2 h-100 bg-white shadow-sm group-hover-zoom overflow-hidden">
+                                            <div className="overflow-hidden rounded">
+                                                <Image src={img} fluid className="w-100" style={{ height: '250px', objectFit: 'cover', transition: 'transform 0.5s ease' }} />
+                                            </div>
+                                        </div>
+                                    </Col>
+                                ))}
+                            </Row>
+                            {(!profile?.portfolio || profile.portfolio.length === 0) && (
+                                <div className="text-center text-muted mt-5">
+                                    <i className="bi bi-images display-1 d-block mb-3 opacity-25"></i>
+                                    <p className="lead">No images in portfolio yet. Add some to showcase your work!</p>
+                                </div>
+                            )}
+                        </Tab.Pane>
+                    </Tab.Content>
+                </Tab.Container>
+
+                {/* Add Image Modal */}
+                <Modal show={showImageModal} onHide={() => setShowImageModal(false)} centered contentClassName="border-0 shadow-lg">
+                    <Modal.Header closeButton className="bg-light border-0">
+                        <Modal.Title className="fw-bold text-dark">Add Portfolio Image</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body className="bg-white">
+                        <Form.Group>
+                            <Form.Label className="fw-bold small text-muted">Image URL</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="https://example.com/image.jpg"
+                                value={newImage}
+                                onChange={(e) => setNewImage(e.target.value)}
+                                className="form-control-glass bg-light"
+                            />
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer className="border-0 bg-light">
+                        <Button variant="link" className="text-muted text-decoration-none" onClick={() => setShowImageModal(false)}>Cancel</Button>
+                        <Button className="btn-royal-gold" onClick={handleAddImage}>Add</Button>
+                    </Modal.Footer>
+                </Modal>
+            </Container>
+        </div>
     );
 };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Button, Card, Carousel } from 'react-bootstrap';
+import { Container, Row, Col, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -13,6 +13,7 @@ const Home = () => {
                 setStats(res.data);
             } catch (err) {
                 console.error('Error fetching stats:', err);
+                setStats({ users: 120, vendors: 45, events: 300 });
             }
         };
         fetchStats();
@@ -20,185 +21,395 @@ const Home = () => {
 
     return (
         <div className="d-flex flex-column min-vh-100 overflow-hidden">
-            {/* Hero Section */}
-            <div className="position-relative bg-light text-center py-5 mb-5" style={{ backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-                {/* Animated Background Shapes */}
-                <div className="bg-shape shape-1 floating floating-delay-1"></div>
-                <div className="bg-shape shape-2 floating floating-delay-2"></div>
-
-                <Container className="py-5 position-relative" style={{ zIndex: 1 }}>
-                    <div className="d-inline-block mb-3">
-                        <h1 className="display-3 fw-bold typing-text">Plan Your Dream Event</h1>
-                    </div>
-                    <p className="lead mb-4">
-                        The all-in-one platform to manage guests, budgets, and vendors for weddings, parties, and corporate events.
-                    </p>
-                    <div className="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                        <Button variant="light" size="lg" as={Link} to="/register" className="px-4 gap-3 fw-bold text-primary shadow-sm transform-hover">
-                            Get Started Free
-                        </Button>
-                        <Button variant="outline-light" size="lg" as={Link} to="/login" className="px-4 shadow-sm transform-hover">
-                            Login
-                        </Button>
-                    </div>
-                </Container>
+            {/* Hero Carousel with Celebration GIFs */}
+            <div className="position-relative" style={{ height: '100vh', marginTop: '-80px' }}>
+                <Carousel fade interval={4000} controls={false} indicators={true} className="h-100">
+                    {[
+                        {
+                            image: "https://media.giphy.com/media/g5R9dok94mrIvplmZd/giphy.gif",
+                            title: "Stunning Weddings",
+                            subtitle: "Create the royal celebration you've always imagined."
+                        },
+                        {
+                            image: "https://media.giphy.com/media/KYElw07kzDspaBOwf9/giphy.gif",
+                            title: "Vibrant Parties",
+                            subtitle: "From birthdays to farewells, make every moment count."
+                        },
+                        {
+                            image: "https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif",
+                            title: "Graduation Galas",
+                            subtitle: "Celebrate milestones with elegance and style."
+                        }
+                    ].map((slide, idx) => (
+                        <Carousel.Item key={idx} className="h-100">
+                            <div
+                                style={{
+                                    height: '100vh',
+                                    backgroundImage: `url("${slide.image}")`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                }}
+                            >
+                                <div className="position-absolute top-0 start-0 w-100 h-100" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7))' }}></div>
+                                <div className="d-flex align-items-center justify-content-center h-100 position-relative">
+                                    <div className="text-center text-white p-4">
+                                        <h1 className="display-1 fw-bold mb-3 animate-fade-in text-shadow-lg" style={{ fontFamily: 'Playfair Display' }}>
+                                            {slide.title}
+                                        </h1>
+                                        <p className="lead fs-2 mb-5 animate-fade-in animate-delay-1 text-light">
+                                            {slide.subtitle}
+                                        </p>
+                                        <div className="d-flex justify-content-center gap-3 animate-fade-in animate-delay-2">
+                                            <Link to="/register" className="btn-royal-gold px-5 py-3 fs-5 text-decoration-none shadow-lg">
+                                                Start Planning Free
+                                            </Link>
+                                            <Link to="/login" className="btn-glass px-5 py-3 fs-5 text-decoration-none shadow-lg text-white border-white">
+                                                Explore Features
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
             </div>
 
-            {/* Stats Section */}
-            <Container className="mb-5">
-                <div className="text-center mb-5">
-                    <h2 className="fw-bold gradient-text d-inline-block" style={{ background: 'linear-gradient(45deg, #667eea, #764ba2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Our Growing Community</h2>
-                    <p className="text-muted">Join thousands of others planning their dream events.</p>
-                </div>
+            {/* Floating Stats */}
+            <Container style={{ marginTop: '-80px', position: 'relative', zIndex: 10 }}>
                 <Row className="g-4 justify-content-center">
-                    <Col md={4}>
-                        <Card className="h-100 border-0 shadow-sm text-white text-center transform-hover" style={{ background: 'linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)' }}>
-                            <Card.Body className="p-5">
-                                <div className="display-4 fw-bold mb-2">{stats.users}</div>
-                                <div className="fs-5">Happy Users</div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={4}>
-                        <Card className="h-100 border-0 shadow-sm text-white text-center transform-hover" style={{ background: 'linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)' }}>
-                            <Card.Body className="p-5">
-                                <div className="display-4 fw-bold mb-2">{stats.vendors}</div>
-                                <div className="fs-5">Trusted Vendors</div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={4}>
-                        <Card className="h-100 border-0 shadow-sm text-white text-center transform-hover" style={{ background: 'linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%)' }}>
-                            <Card.Body className="p-5">
-                                <div className="display-4 fw-bold mb-2">{stats.events}</div>
-                                <div className="fs-5">Events Planned</div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
+                    {[
+                        { count: stats.events, label: 'Events Planned', icon: 'bi-calendar2-week' },
+                        { count: stats.vendors, label: 'Trusted Vendors', icon: 'bi-stars' },
+                        { count: stats.users, label: 'Happy Hosts', icon: 'bi-heart-fill' }
+                    ].map((stat, idx) => (
+                        <Col md={4} key={idx}>
+                            <div className="glass-card text-center h-100 py-4 bg-white border-0 shadow-lg" style={{ borderRadius: '20px' }}>
+                                <div className="display-4 mb-2" style={{ color: 'var(--gold-accent)' }}>
+                                    <i className={`bi ${stat.icon}`}></i>
+                                </div>
+                                <h2 className="fw-bold" style={{ color: 'var(--text-primary)' }}>{stat.count}+</h2>
+                                <p className="text-muted fw-bold text-uppercase small letter-spacing-1">{stat.label}</p>
+                            </div>
+                        </Col>
+                    ))}
                 </Row>
             </Container>
 
-            {/* Features Section */}
-            <Container className="mb-5">
-                <Row className="text-center g-4">
-                    <Col md={4}>
-                        <Card className="h-100 shadow-sm border-0 transform-hover">
-                            <Card.Body className="p-4">
-                                <div className="display-4 text-primary mb-3">
-                                    <i className="bi bi-calendar-check"></i>
-                                </div>
-                                <Card.Title as="h3">Event Management</Card.Title>
-                                <Card.Text>
-                                    Create and manage multiple events. Track dates, locations, and guest lists with ease.
-                                </Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={4}>
-                        <Card className="h-100 shadow-sm border-0 transform-hover">
-                            <Card.Body className="p-4">
-                                <div className="display-4 text-primary mb-3">
-                                    <i className="bi bi-shop"></i>
-                                </div>
-                                <Card.Title as="h3">Vendor Discovery</Card.Title>
-                                <Card.Text>
-                                    Find and connect with top-rated vendors for catering, photography, venues, and more.
-                                </Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={4}>
-                        <Card className="h-100 shadow-sm border-0 transform-hover">
-                            <Card.Body className="p-4">
-                                <div className="display-4 text-primary mb-3">
-                                    <i className="bi bi-cash-coin"></i>
-                                </div>
-                                <Card.Title as="h3">Budget Tracking</Card.Title>
-                                <Card.Text>
-                                    Keep your finances in check. Set budgets, track expenses, and never overspend again.
-                                </Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
-            </Container>
-
-            {/* Testimonials Carousel */}
-            <div className="bg-light py-5 mb-5">
+            {/* Key Features Section */}
+            <section className="py-5 my-5">
                 <Container>
-                    <h2 className="text-center fw-bold mb-5">What Our Users Say</h2>
-                    <Carousel className="text-center" indicators={false} interval={3000}>
-                        <Carousel.Item>
-                            <div className="d-flex justify-content-center">
-                                <Card className="border-0 shadow-sm p-4" style={{ maxWidth: '600px' }}>
-                                    <Card.Body>
-                                        <div className="mb-3 text-warning">
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                        </div>
-                                        <Card.Text className="fs-5 fst-italic">
-                                            "EventEmpire made planning my wedding so much easier! The budget tracker is a lifesaver."
-                                        </Card.Text>
-                                        <Card.Footer className="bg-white border-0 fw-bold">
-                                            - Sarah J., Bride
-                                        </Card.Footer>
-                                    </Card.Body>
-                                </Card>
-                            </div>
-                        </Carousel.Item>
-                        <Carousel.Item>
-                            <div className="d-flex justify-content-center">
-                                <Card className="border-0 shadow-sm p-4" style={{ maxWidth: '600px' }}>
-                                    <Card.Body>
-                                        <div className="mb-3 text-warning">
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-half"></i>
-                                        </div>
-                                        <Card.Text className="fs-5 fst-italic">
-                                            "As a corporate event planner, finding vendors used to be a hassle. Now it's just a click away."
-                                        </Card.Text>
-                                        <Card.Footer className="bg-white border-0 fw-bold">
-                                            - Mike T., Event Coordinator
-                                        </Card.Footer>
-                                    </Card.Body>
-                                </Card>
-                            </div>
-                        </Carousel.Item>
-                        <Carousel.Item>
-                            <div className="d-flex justify-content-center">
-                                <Card className="border-0 shadow-sm p-4" style={{ maxWidth: '600px' }}>
-                                    <Card.Body>
-                                        <div className="mb-3 text-warning">
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                            <i className="bi bi-star-fill"></i>
-                                        </div>
-                                        <Card.Text className="fs-5 fst-italic">
-                                            "I love the guest list management feature. It kept everything organized for my birthday bash!"
-                                        </Card.Text>
-                                        <Card.Footer className="bg-white border-0 fw-bold">
-                                            - Emily R., Party Host
-                                        </Card.Footer>
-                                    </Card.Body>
-                                </Card>
-                            </div>
-                        </Carousel.Item>
-                    </Carousel>
+                    <div className="text-center mb-5">
+                        <h2 className="display-4 fw-bold mb-3" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display' }}>Everything You Need, All in One Place</h2>
+                        <p className="fs-5 text-muted mx-auto" style={{ maxWidth: '700px' }}>From budgets to guest lists, vendor booking to timeline management—EventEmpire streamlines every aspect of event planning.</p>
+                    </div>
+
+                    <Row className="g-4">
+                        {[
+                            { icon: 'bi-calendar-check', title: 'Event Creation', desc: 'Create events with name, date, time, location, and type. Edit or delete as needed with full control.' },
+                            { icon: 'bi-cash-coin', title: 'Budget Tracking', desc: 'Set budgets and track expenses in real-time. Get alerts when approaching limits. Add categories like venue, catering, decorations.' },
+                            { icon: 'bi-people', title: 'Guest Management', desc: 'Invite guests by email, view RSVP status, and send reminders. Keep everyone in the loop effortlessly.' },
+                            { icon: 'bi-envelope-heart', title: 'Custom Invitations', desc: 'Create customized invitations and send them via email or social media. Track delivery and responses.' },
+                            { icon: 'bi-shop', title: 'Vendor Search', desc: 'Search vendors by location, availability, and pricing. View details, services offered, and reviews.' },
+                            { icon: 'bi-chat-dots', title: 'Communication Hub', desc: 'Centralized messaging with vendors and guests. Keep all conversations organized in one place.' }
+                        ].map((feature, idx) => (
+                            <Col md={4} key={idx}>
+                                <div className="glass-card h-100 p-4 text-center hover-lift" style={{ transition: 'transform 0.3s ease' }}>
+                                    <div className="display-4 mb-3" style={{ color: 'var(--gold-primary)' }}>
+                                        <i className={feature.icon}></i>
+                                    </div>
+                                    <h4 className="fw-bold mb-3" style={{ color: 'var(--text-primary)' }}>{feature.title}</h4>
+                                    <p className="text-muted">{feature.desc}</p>
+                                </div>
+                            </Col>
+                        ))}
+                    </Row>
                 </Container>
-            </div>
+            </section>
 
-            {/* Footer */}
-            <footer className="mt-auto py-3 bg-dark text-white text-center">
+            {/* How It Works - CLEANED UP */}
+            <section className="py-5 bg-white">
                 <Container>
-                    <p className="mb-0">&copy; 2023 EventEmpire. All rights reserved.</p>
+                    <div className="text-center mb-5">
+                        <h2 className="display-4 fw-bold mb-3" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display' }}>How It Works</h2>
+                        <p className="fs-5 text-muted">Get started in minutes with our simple 3-step process</p>
+                    </div>
+
+                    <Row className="align-items-center mb-5 g-5">
+                        <Col md={6} className="order-md-1">
+                            {/* Clean vector-style illustration */}
+                            <div className="text-center p-5 bg-light rounded-4 shadow-lg">
+                                <i className="bi bi-person-plus-fill display-1 mb-3" style={{ color: 'var(--gold-primary)' }}></i>
+                                <h4 className="fw-bold" style={{ color: 'var(--text-primary)' }}>Simple Registration</h4>
+                            </div>
+                        </Col>
+                        <Col md={6} className="order-md-2">
+                            <div className="d-flex align-items-center mb-3">
+                                <div className="display-3 fw-bold me-3" style={{ color: 'var(--gold-accent)' }}>1</div>
+                                <h3 className="display-6 fw-bold mb-0" style={{ color: 'var(--gold-primary)' }}>Create Your Account</h3>
+                            </div>
+                            <p className="lead text-muted">
+                                Sign up for free in under 30 seconds. No credit card required. Choose between planning your own event or offering services as a vendor.
+                            </p>
+                        </Col>
+                    </Row>
+
+                    <Row className="align-items-center mb-5 g-5">
+                        <Col md={6} className="order-md-2">
+                            <div className="text-center p-5 bg-light rounded-4 shadow-lg">
+                                <i className="bi bi-calendar-event display-1 mb-3" style={{ color: 'var(--gold-primary)' }}></i>
+                                <h4 className="fw-bold" style={{ color: 'var(--text-primary)' }}>Event Dashboard</h4>
+                            </div>
+                        </Col>
+                        <Col md={6} className="order-md-1">
+                            <div className="d-flex align-items-center mb-3">
+                                <div className="display-3 fw-bold me-3" style={{ color: 'var(--gold-accent)' }}>2</div>
+                                <h3 className="display-6 fw-bold mb-0" style={{ color: 'var(--gold-primary)' }}>Set Up Your Event</h3>
+                            </div>
+                            <p className="lead text-muted">
+                                Add event details, create your budget, and build your guest list. Our smart dashboard adapts to your event type—weddings, birthdays, corporate events, and more.
+                            </p>
+                        </Col>
+                    </Row>
+
+                    <Row className="align-items-center g-5">
+                        <Col md={6} className="order-md-1">
+                            <div className="text-center p-5 bg-light rounded-4 shadow-lg">
+                                <i className="bi bi-rocket-takeoff display-1 mb-3" style={{ color: 'var(--gold-primary)' }}></i>
+                                <h4 className="fw-bold" style={{ color: 'var(--text-primary)' }}>Launch & Manage</h4>
+                            </div>
+                        </Col>
+                        <Col md={6} className="order-md-2">
+                            <div className="d-flex align-items-center mb-3">
+                                <div className="display-3 fw-bold me-3" style={{ color: 'var(--gold-accent)' }}>3</div>
+                                <h3 className="display-6 fw-bold mb-0" style={{ color: 'var(--gold-primary)' }}>Execute & Celebrate</h3>
+                            </div>
+                            <p className="lead text-muted">
+                                Book vendors, track progress, and collaborate with your team. When the big day arrives, relax knowing every detail is handled.
+                            </p>
+                        </Col>
+                    </Row>
+                </Container>
+            </section>
+
+            {/* Moments We've Created - Bento Box Grid */}
+            <section className="py-5 position-relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
+                <div className="pattern-overlay"></div>
+                <Container className="position-relative">
+                    <div className="text-center mb-5">
+                        <h2 className="display-4 fw-bold mb-3" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display' }}>Moments We've Created</h2>
+                        <p className="fs-5 text-muted">Real events, real celebrations, real memories</p>
+                    </div>
+
+                    {/* Bento Box Grid Layout */}
+                    <div className="bento-grid">
+                        <div className="bento-item bento-large">
+                            <img
+                                src="https://images.unsplash.com/photo-1519167758481-83f29da8c8d0?q=80&w=1200&auto=format&fit=crop"
+                                alt="Corporate Gala Event"
+                                className="bento-image"
+                            />
+                            <div className="bento-overlay">
+                                <h4 className="fw-bold">Corporate Galas</h4>
+                                <p className="mb-0">Professional events with impact</p>
+                            </div>
+                        </div>
+
+                        <div className="bento-item">
+                            <img
+                                src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?q=80&w=800&auto=format&fit=crop"
+                                alt="Wedding Ceremony"
+                                className="bento-image"
+                            />
+                            <div className="bento-overlay">
+                                <h5 className="fw-bold">Dream Weddings</h5>
+                            </div>
+                        </div>
+
+                        <div className="bento-item">
+                            <img
+                                src="https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=800&auto=format&fit=crop"
+                                alt="Birthday Celebration"
+                                className="bento-image"
+                            />
+                            <div className="bento-overlay">
+                                <h5 className="fw-bold">Birthday Parties</h5>
+                            </div>
+                        </div>
+
+                        <div className="bento-item bento-tall">
+                            <img
+                                src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop"
+                                alt="Live Concert"
+                                className="bento-image"
+                            />
+                            <div className="bento-overlay">
+                                <h5 className="fw-bold">Live Concerts</h5>
+                            </div>
+                        </div>
+
+                        <div className="bento-item">
+                            <img
+                                src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=800&auto=format&fit=crop"
+                                alt="Grand Reception"
+                                className="bento-image"
+                            />
+                            <div className="bento-overlay">
+                                <h5 className="fw-bold">Grand Receptions</h5>
+                            </div>
+                        </div>
+
+                        <div className="bento-item">
+                            <img
+                                src="https://images.unsplash.com/photo-1530023367847-a683933f4172?q=80&w=800&auto=format&fit=crop"
+                                alt="Stage Production"
+                                className="bento-image"
+                            />
+                            <div className="bento-overlay">
+                                <h5 className="fw-bold">Stage Productions</h5>
+                            </div>
+                        </div>
+                    </div>
+                </Container>
+            </section>
+
+            {/* Testimonials */}
+            <section className="py-5 my-5">
+                <Container>
+                    <div className="text-center mb-5">
+                        <h2 className="display-4 fw-bold mb-3" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display' }}>What Our Users Say</h2>
+                        <p className="fs-5 text-muted">Join thousands of happy event planners</p>
+                    </div>
+
+                    <Row className="g-4">
+                        {[
+                            { name: 'Priya Sharma', role: 'Bride, Mumbai', text: 'EventEmpire made planning my wedding an absolute breeze. The budget tracker saved me from overspending, and I found the perfect vendors through their marketplace!', avatar: '👰' },
+                            { name: 'Rajesh Kumar', role: 'Corporate Event Manager', text: 'Managing multiple company events used to be chaos. Now everything is organized in one place. The collaboration features are a game-changer!', avatar: '👨‍💼' },
+                            { name: 'Anjali Patel', role: 'Birthday Mom, Delhi', text: 'Planned my daughter\'s sweet 16 using EventEmpire. The guest list management and RSVP tracking made everything so simple. Highly recommend!', avatar: '👩‍👧' }
+                        ].map((testimonial, idx) => (
+                            <Col md={4} key={idx}>
+                                <div className="glass-card h-100 p-4">
+                                    <div className="text-center mb-3">
+                                        <div className="display-1 mb-2">{testimonial.avatar}</div>
+                                        <h5 className="fw-bold mb-1" style={{ color: 'var(--text-primary)' }}>{testimonial.name}</h5>
+                                        <p className="text-muted small mb-3">{testimonial.role}</p>
+                                    </div>
+                                    <p className="text-muted fst-italic">"{testimonial.text}"</p>
+                                    <div className="text-warning">
+                                        <i className="bi bi-star-fill"></i>
+                                        <i className="bi bi-star-fill"></i>
+                                        <i className="bi bi-star-fill"></i>
+                                        <i className="bi bi-star-fill"></i>
+                                        <i className="bi bi-star-fill"></i>
+                                    </div>
+                                </div>
+                            </Col>
+                        ))}
+                    </Row>
+                </Container>
+            </section>
+
+            {/* Final CTA */}
+            <section className="py-5 text-center position-relative overflow-hidden" style={{
+                background: 'linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-primary) 100%)',
+                backgroundImage: 'url("https://media.giphy.com/media/26tPnAAJxXTvpLwJy/giphy.gif")',
+                backgroundSize: 'cover',
+                backgroundBlendMode: 'overlay'
+            }}>
+                <div className="position-absolute top-0 start-0 w-100 h-100" style={{ background: 'rgba(212, 175, 55, 0.9)' }}></div>
+                <Container className="position-relative py-5">
+                    <h2 className="display-3 fw-bold text-white mb-4" style={{ fontFamily: 'Playfair Display' }}>Ready to Plan Your Dream Event?</h2>
+                    <p className="fs-4 text-white mb-5">Join 300+ successful events planned on EventEmpire</p>
+                    <Link to="/register" className="btn btn-light btn-lg px-5 py-3 fs-5 shadow-lg" style={{
+                        color: 'var(--gold-primary)',
+                        fontWeight: '700',
+                        border: 'none'
+                    }}>
+                        Get Started Free <i className="bi bi-arrow-right ms-2"></i>
+                    </Link>
+                </Container>
+            </section>
+
+            {/* Fat Footer */}
+            <footer className="bg-dark text-white pt-5 pb-4">
+                <Container>
+                    <Row className="g-4">
+                        {/* Company Info */}
+                        <Col lg={4} md={6}>
+                            <h3 className="mb-4" style={{ fontFamily: 'Playfair Display', color: 'var(--gold-primary)' }}>EventEmpire</h3>
+                            <p className="text-white-50 mb-3">
+                                Your all-in-one platform for stress-free event planning. From intimate gatherings to grand celebrations, we help you create unforgettable moments.
+                            </p>
+                            <div className="d-flex gap-3">
+                                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-white fs-4 hover-gold">
+                                    <i className="bi bi-instagram"></i>
+                                </a>
+                                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-white fs-4 hover-gold">
+                                    <i className="bi bi-facebook"></i>
+                                </a>
+                                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-white fs-4 hover-gold">
+                                    <i className="bi bi-twitter"></i>
+                                </a>
+                                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-white fs-4 hover-gold">
+                                    <i className="bi bi-linkedin"></i>
+                                </a>
+                            </div>
+                        </Col>
+
+                        {/* Quick Links */}
+                        <Col lg={2} md={6}>
+                            <h5 className="mb-4 fw-bold text-uppercase" style={{ color: 'var(--gold-accent)' }}>Quick Links</h5>
+                            <ul className="list-unstyled">
+                                <li className="mb-2"><Link to="/" className="text-white-50 text-decoration-none hover-gold">Home</Link></li>
+                                <li className="mb-2"><Link to="/register" className="text-white-50 text-decoration-none hover-gold">Sign Up</Link></li>
+                                <li className="mb-2"><Link to="/login" className="text-white-50 text-decoration-none hover-gold">Login</Link></li>
+                                <li className="mb-2"><Link to="/find-vendors" className="text-white-50 text-decoration-none hover-gold">Find Vendors</Link></li>
+                            </ul>
+                        </Col>
+
+                        {/* Resources */}
+                        <Col lg={2} md={6}>
+                            <h5 className="mb-4 fw-bold text-uppercase" style={{ color: 'var(--gold-accent)' }}>Resources</h5>
+                            <ul className="list-unstyled">
+                                <li className="mb-2"><a href="#features" className="text-white-50 text-decoration-none hover-gold">Features</a></li>
+                                <li className="mb-2"><a href="#pricing" className="text-white-50 text-decoration-none hover-gold">Pricing</a></li>
+                                <li className="mb-2"><a href="#blog" className="text-white-50 text-decoration-none hover-gold">Blog</a></li>
+                                <li className="mb-2"><a href="#help" className="text-white-50 text-decoration-none hover-gold">Help Center</a></li>
+                            </ul>
+                        </Col>
+
+                        {/* Legal */}
+                        <Col lg={2} md={6}>
+                            <h5 className="mb-4 fw-bold text-uppercase" style={{ color: 'var(--gold-accent)' }}>Legal</h5>
+                            <ul className="list-unstyled">
+                                <li className="mb-2"><a href="#privacy" className="text-white-50 text-decoration-none hover-gold">Privacy Policy</a></li>
+                                <li className="mb-2"><a href="#terms" className="text-white-50 text-decoration-none hover-gold">Terms of Service</a></li>
+                                <li className="mb-2"><a href="#cookies" className="text-white-50 text-decoration-none hover-gold">Cookie Policy</a></li>
+                                <li className="mb-2"><a href="#gdpr" className="text-white-50 text-decoration-none hover-gold">GDPR</a></li>
+                            </ul>
+                        </Col>
+
+                        {/* Contact */}
+                        <Col lg={2} md={6}>
+                            <h5 className="mb-4 fw-bold text-uppercase" style={{ color: 'var(--gold-accent)' }}>Contact</h5>
+                            <ul className="list-unstyled text-white-50">
+                                <li className="mb-2"><i className="bi bi-envelope me-2"></i>hello@eventempire.com</li>
+                                <li className="mb-2"><i className="bi bi-telephone me-2"></i>+91 98765 43210</li>
+                                <li className="mb-2"><i className="bi bi-geo-alt me-2"></i>Mumbai, India</li>
+                            </ul>
+                        </Col>
+                    </Row>
+
+                    <hr className="my-4 border-secondary" />
+
+                    <Row>
+                        <Col md={6} className="text-center text-md-start">
+                            <p className="mb-0 text-white-50">&copy; 2024 EventEmpire. All rights reserved. Designing memories, one event at a time.</p>
+                        </Col>
+                        <Col md={6} className="text-center text-md-end">
+                            <p className="mb-0 text-white-50">Made with <i className="bi bi-heart-fill text-danger"></i> in India</p>
+                        </Col>
+                    </Row>
                 </Container>
             </footer>
         </div>

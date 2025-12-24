@@ -12,9 +12,7 @@ const NavigationBar = () => {
         navigate('/');
     };
 
-    if (!user) return null;
-
-    const menuItems = user.role === 'vendor' ? [
+    const menuItems = !user ? [] : user.role === 'vendor' ? [
         { label: 'Dashboard', path: '/vendor-dashboard' },
         { label: 'Messages', path: '/messages' },
     ] : [
@@ -24,23 +22,38 @@ const NavigationBar = () => {
     ];
 
     return (
-        <Navbar bg="primary" variant="dark" expand="lg" className="mb-4" style={{ background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
+        <Navbar expand="lg" className="glass-nav mb-0 sticky-top py-3">
             <Container>
-                <Navbar.Brand as={Link} to="/" className="fw-bold">EventEmpire</Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                <Navbar.Brand as={Link} to="/" className="fw-bold fs-3" style={{ fontFamily: 'Playfair Display, serif', color: 'var(--gold-primary)' }}>
+                    EventEmpire
+                </Navbar.Brand>
+                <Navbar.Toggle aria-controls="basic-navbar-nav" style={{ borderColor: 'var(--gold-primary)' }} />
                 <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="ms-auto">
+                    <Nav className="ms-auto align-items-center">
                         {menuItems.map((item) => (
-                            <Nav.Link key={item.label} as={Link} to={item.path} className="text-white">
+                            <Nav.Link key={item.label} as={Link} to={item.path} className="px-3" style={{ color: 'var(--text-primary)', fontWeight: '500' }}>
                                 {item.label}
                             </Nav.Link>
                         ))}
-                        <Button variant="outline-light" as={Link} to="/profile" className="ms-2">
-                            Profile
-                        </Button>
-                        <Button variant="outline-light" onClick={handleLogout} className="ms-2">
-                            Logout
-                        </Button>
+                        {user ? (
+                            <>
+                                <Button variant="outline-light" as={Link} to="/profile" className="ms-2 btn-glass">
+                                    Profile
+                                </Button>
+                                <Button variant="outline-light" onClick={handleLogout} className="ms-2 btn-royal-gold border-0">
+                                    Logout
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button variant="outline-light" as={Link} to="/login" className="ms-2 btn-glass">
+                                    Login
+                                </Button>
+                                <Button variant="outline-light" as={Link} to="/register" className="ms-2 btn-royal-gold border-0">
+                                    Sign Up
+                                </Button>
+                            </>
+                        )}
                     </Nav>
                 </Navbar.Collapse>
             </Container>

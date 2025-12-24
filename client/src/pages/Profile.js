@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Container, Form, Button, Alert, Card } from 'react-bootstrap';
+import { Container, Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 
@@ -32,43 +32,53 @@ const Profile = () => {
     };
 
     return (
-        <Container className="mt-4" style={{ maxWidth: '600px' }}>
-            <h2 className="mb-4">Edit Profile</h2>
-            {message && (
-                <Alert variant={message.type} onClose={() => setMessage(null)} dismissible>
-                    {message.text}
-                </Alert>
-            )}
-            <Card className="shadow-sm">
-                <Card.Body>
+        <div className="py-5" style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+            <Container style={{ maxWidth: '600px' }}>
+                {message && (
+                    <Alert variant={message.type} onClose={() => setMessage(null)} dismissible className="glass-card border-0 mb-4 shadow-sm">
+                        {message.text}
+                    </Alert>
+                )}
+                <div className="glass-card p-4 p-md-5 bg-white shadow-lg border-0">
+                    <div className="text-center mb-4">
+                        <h2 className="fw-bold display-6" style={{ fontFamily: 'Playfair Display', color: 'var(--royal-accent)' }}>Edit Profile</h2>
+                        <p className="text-secondary">Update your personal information</p>
+                    </div>
+
                     <Form onSubmit={handleUpdateProfile}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Name</Form.Label>
+                        <Form.Group className="mb-4">
+                            <Form.Label className="text-muted fw-bold small">Name</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
+                                className="form-control-glass bg-light"
+                                placeholder="Enter your name"
                             />
                         </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Email</Form.Label>
+                        <Form.Group className="mb-4">
+                            <Form.Label className="text-muted fw-bold small">Email</Form.Label>
                             <Form.Control
                                 type="email"
                                 value={email}
                                 disabled
+                                className="form-control-glass bg-light"
+                                style={{ opacity: 0.8 }}
                             />
-                            <Form.Text className="text-muted">
-                                Email cannot be changed.
+                            <Form.Text className="text-muted small">
+                                Email address cannot be changed for security reasons.
                             </Form.Text>
                         </Form.Group>
-                        <Button variant="primary" type="submit">
-                            Save Changes
-                        </Button>
+                        <div className="d-grid mt-5">
+                            <Button type="submit" className="btn-royal-gold py-2 fs-5 shadow-sm">
+                                Save Changes
+                            </Button>
+                        </div>
                     </Form>
-                </Card.Body>
-            </Card>
-        </Container>
+                </div>
+            </Container>
+        </div>
     );
 };
 

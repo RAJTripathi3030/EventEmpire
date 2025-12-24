@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, ListGroup, Form, Button, Card } from 'react-bootstrap';
+import { Container, Row, Col, ListGroup, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -78,14 +78,11 @@ const Messages = () => {
             } catch (err) {
                 console.error(err);
                 if (err.response) {
-                    // Server responded with a status code outside 2xx
                     const errorMsg = err.response.data?.error || err.response.data?.message || 'Failed to delete conversation';
                     alert(`Server Error: ${errorMsg}`);
                 } else if (err.request) {
-                    // Request was made but no response received
                     alert('Network Error: No response from server. Please check your connection.');
                 } else {
-                    // Something happened in setting up the request
                     alert(`Error: ${err.message}`);
                 }
             }
@@ -98,7 +95,7 @@ const Messages = () => {
 
         try {
             const res = await axios.post('http://localhost:5000/api/messages', {
-                receiverId: currentChat._id, // Changed from recipientId to receiverId to match backend
+                receiverId: currentChat._id,
                 content: newMessage
             }, config);
             setMessages([...messages, res.data]);
@@ -114,66 +111,87 @@ const Messages = () => {
 
     return (
         <Container className="mt-4" style={{ height: '80vh' }}>
-            <Row className="h-100">
-                <Col md={4} className="border-end">
-                    <h4 className="mb-3">Conversations</h4>
-                    <ListGroup variant="flush">
-                        {conversations.map((c) => (
-                            <ListGroup.Item
-                                key={c._id}
-                                action
-                                active={currentChat?._id === c._id}
-                                onClick={() => setCurrentChat(c)}
-                            >
-                                {c.name}
-                            </ListGroup.Item>
-                        ))}
-                    </ListGroup>
-                </Col>
-                <Col md={8} className="d-flex flex-column h-100">
-                    {currentChat ? (
-                        <>
-                            <div className="p-3 border-bottom d-flex justify-content-between align-items-center">
-                                <h5>{currentChat.name}</h5>
-                                <Button variant="outline-danger" size="sm" onClick={handleDeleteConversation}>
-                                    <i className="bi bi-trash me-1"></i> Delete Conversation
-                                </Button>
-                            </div>
-                            <div className="flex-grow-1 overflow-auto p-3" style={{ backgroundColor: '#f8f9fa' }}>
-                                {messages.map((msg, index) => (
-                                    <div
-                                        key={index}
-                                        className={`d-flex mb-2 ${msg.sender === user._id ? 'justify-content-end' : 'justify-content-start'}`}
-                                    >
-                                        <Card
-                                            body
-                                            className={`p-2 ${msg.sender === user._id ? 'bg-primary text-white' : 'bg-white'}`}
-                                            style={{ maxWidth: '70%', borderRadius: '15px' }}
-                                        >
-                                            {msg.content}
-                                        </Card>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="p-3 border-top">
-                                <Form onSubmit={handleSendMessage} className="d-flex gap-2">
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Type a message..."
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
-                                    />
-                                    <Button type="submit" variant="primary">Send</Button>
-                                </Form>
-                            </div>
-                        </>
-                    ) : (
-                        <div className="d-flex align-items-center justify-content-center h-100 text-muted">
-                            Select a conversation to start messaging
+            <div className="glass-card h-100 p-0 overflow-hidden d-flex bg-white shadow-lg border-0">
+                <Row className="h-100 g-0 w-100">
+                    <Col md={4} className="border-end border-light bg-light">
+                        <div className="p-3 border-bottom border-light">
+                            <h4 className="fw-bold m-0" style={{ color: 'var(--royal-accent)', fontFamily: 'Playfair Display' }}>Conversations</h4>
                         </div>
-                    )}
-                </Col>
-            </Row>
+                        <ListGroup variant="flush" className="bg-transparent overflow-auto" style={{ maxHeight: 'calc(80vh - 60px)' }}>
+                            {conversations.length > 0 ? (
+                                conversations.map((c) => (
+                                    <ListGroup.Item
+                                        key={c._id}
+                                        action
+                                        active={currentChat?._id === c._id}
+                                        onClick={() => setCurrentChat(c)}
+                                        className={`bg-transparent text-dark border-bottom border-light ${currentChat?._id === c._id ? 'bg-white shadow-sm' : ''}`}
+                                        style={{ cursor: 'pointer', transition: 'background-color 0.2s' }}
+                                    >
+                                        <div className="d-flex align-items-center">
+                                            <div className="rounded-circle bg-warning d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px' }}>
+                                                <i className="bi bi-person-fill text-dark"></i>
+                                            </div>
+                                            <div>
+                                                <div className="fw-bold">{c.name}</div>
+                                                <div className="small text-muted text-truncate" style={{ maxWidth: '150px' }}>Select to chat</div>
+                                            </div>
+                                        </div>
+                                    </ListGroup.Item>
+                                ))
+                            ) : (
+                                <div className="p-4 text-center text-muted">No conversations yet</div>
+                            )}
+                        </ListGroup>
+                    </Col>
+                    <Col md={8} className="d-flex flex-column h-100 bg-white">
+                        {currentChat ? (
+                            <>
+                                <div className="p-3 border-bottom border-light d-flex justify-content-between align-items-center" style={{ backgroundColor: '#f8f9fa' }}>
+                                    <h5 className="m-0 text-dark fw-bold" style={{ fontFamily: 'Playfair Display' }}>{currentChat.name}</h5>
+                                    <Button variant="outline-danger" size="sm" onClick={handleDeleteConversation} className="border-0">
+                                        <i className="bi bi-trash"></i>
+                                    </Button>
+                                </div>
+                                <div className="flex-grow-1 overflow-auto p-4 d-flex flex-column gap-2" style={{ backgroundColor: '#fffcf5' }}>
+                                    {messages.map((msg, index) => (
+                                        <div
+                                            key={index}
+                                            className={`d-flex ${msg.sender === user._id ? 'justify-content-end' : 'justify-content-start'}`}
+                                        >
+                                            <div
+                                                className={`p-3 rounded-3 shadow-sm ${msg.sender === user._id ? 'btn-royal-gold text-dark' : 'bg-white border text-dark'}`}
+                                                style={{ maxWidth: '70%', wordWrap: 'break-word' }}
+                                            >
+                                                {msg.content}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="p-3 border-top border-light" style={{ backgroundColor: '#f8f9fa' }}>
+                                    <Form onSubmit={handleSendMessage} className="d-flex gap-2">
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Type a message..."
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            className="form-control-glass border shadow-sm bg-white text-dark"
+                                        />
+                                        <Button type="submit" className="btn-royal-gold shadow-sm">
+                                            <i className="bi bi-send-fill"></i>
+                                        </Button>
+                                    </Form>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="d-flex flex-column align-items-center justify-content-center h-100 text-muted opacity-50">
+                                <i className="bi bi-chat-square-text display-1 mb-3"></i>
+                                <h4>Select a conversation to start messaging</h4>
+                            </div>
+                        )}
+                    </Col>
+                </Row>
+            </div>
         </Container>
     );
 };
