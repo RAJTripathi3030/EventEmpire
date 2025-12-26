@@ -286,3 +286,74 @@ a:hover {
 .group-hover-zoom:hover img {
     transform: scale(1.1);
 }
+
+/* Swiper Carousel Customization for Moments Section */
+.moments-carousel {
+    padding-bottom: 50px;
+}
+
+.moments-carousel .swiper-button-next,
+.moments-carousel .swiper-button-prev {
+    color: var(--gold-primary);
+    background: rgba(255, 255, 255, 0.9);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.moments-carousel .swiper-button-next:after,
+.moments-carousel .swiper-button-prev:after {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.moments-carousel .swiper-button-next:hover,
+.moments-carousel .swiper-button-prev:hover {
+    background: var(--gold-primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.moments-carousel .swiper-pagination-bullet {
+    background: var(--gold-accent);
+    opacity: 0.5;
+    width: 12px;
+    height: 12px;
+    transition: all 0.3s ease;
+}
+
+.moments-carousel .swiper-pagination-bullet-active {
+    opacity: 1;
+    background: var(--gold-primary);
+    width: 30px;
+    border-radius: 6px;
+}
+
+.moment-card {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.moment-card:hover {
+    transform: translateY(-5px);
+}
+
+.moment-card img,
+.moment-card video {
+    transition: transform 0.5s ease;
+}
+
+.moment-card:hover img,
+.moment-card:hover video {
+    transform: scale(1.05);
+}
+
+.moment-overlay {
+    transition: transform 0.3s ease;
+}
+
+.moment-card:hover .moment-overlay {
+    transform: translateY(-10px);
+}

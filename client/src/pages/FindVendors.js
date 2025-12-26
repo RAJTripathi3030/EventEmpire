@@ -86,16 +86,16 @@ const FindVendors = () => {
                                         <Badge bg="warning" text="dark" pill className="px-3 py-2">{vendor.serviceType}</Badge>
                                     </div>
                                     <div className="mb-3">
-                                        <p className="mb-2 text-muted"><i className="bi bi-geo-alt me-2 text-warning"></i> {vendor.location}</p>
-                                        <p className="mb-2 text-dark fw-medium"><i className="bi bi-tag me-2 text-warning"></i> {vendor.pricing}</p>
+                                        <p className="mb-2 text-muted"><i className="bi bi-geo-alt me-2 text-warning"></i> {vendor.location?.city || vendor.location?.address || 'N/A'}</p>
+                                        <p className="mb-2 text-dark fw-medium"><i className="bi bi-tag me-2 text-warning"></i> {vendor.pricingTiers?.[0] ? `From ₹${vendor.pricingTiers[0].price}` : 'Contact for pricing'}</p>
                                         {vendor.description && (
                                             <p className="text-secondary small text-truncate mt-3 border-top pt-2">{vendor.description}</p>
                                         )}
                                     </div>
                                 </div>
                                 <div className="p-3 bg-light border-top">
-                                    <Button className="w-100 btn-glass text-dark border-0 shadow-sm" onClick={() => handleViewProfile(vendor)}>
-                                        View Details
+                                    <Button className="w-100 btn-royal-gold shadow-sm" onClick={() => navigate(`/vendor/${vendor._id}/book`)}>
+                                        Book This Vendor
                                     </Button>
                                 </div>
                             </div>
@@ -122,8 +122,8 @@ const FindVendors = () => {
                                 <h5 className="mb-3" style={{ color: 'var(--gold-primary)' }}>Details</h5>
                                 <div className="p-3 bg-light rounded mb-3">
                                     <p className="mb-2"><strong>Service:</strong> {selectedVendor?.serviceType}</p>
-                                    <p className="mb-2"><strong>Location:</strong> {selectedVendor?.location}</p>
-                                    <p className="mb-0"><strong>Pricing:</strong> {selectedVendor?.pricing}</p>
+                                    <p className="mb-2"><strong>Location:</strong> {selectedVendor?.location?.city ? `${selectedVendor.location.city}, ${selectedVendor.location.state}` : 'N/A'}</p>
+                                    <p className="mb-0"><strong>Pricing:</strong> {selectedVendor?.pricingTiers?.[0] ? `From ₹${selectedVendor.pricingTiers[0].price}/${selectedVendor.pricingTiers[0].packageName}` : 'Contact for pricing'}</p>
                                 </div>
                                 <h5 className="mb-2" style={{ color: 'var(--gold-primary)' }}>Description</h5>
                                 <p className="text-secondary">{selectedVendor?.description || 'No description available.'}</p>

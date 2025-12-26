@@ -2,6 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 const Home = () => {
     const [stats, setStats] = useState({ users: 0, vendors: 0, events: 0 });
@@ -192,7 +199,7 @@ const Home = () => {
                 </Container>
             </section>
 
-            {/* Moments We've Created - Bento Box Grid */}
+            {/* Moments We've Created - Infinite Mixed-Media Carousel */}
             <section className="py-5 position-relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
                 <div className="pattern-overlay"></div>
                 <Container className="position-relative">
@@ -201,75 +208,64 @@ const Home = () => {
                         <p className="fs-5 text-muted">Real events, real celebrations, real memories</p>
                     </div>
 
-                    {/* Bento Box Grid Layout */}
-                    <div className="bento-grid">
-                        <div className="bento-item bento-large">
-                            <img
-                                src="https://images.unsplash.com/photo-1519167758481-83f29da8c8d0?q=80&w=1200&auto=format&fit=crop"
-                                alt="Corporate Gala Event"
-                                className="bento-image"
-                            />
-                            <div className="bento-overlay">
-                                <h4 className="fw-bold">Corporate Galas</h4>
-                                <p className="mb-0">Professional events with impact</p>
-                            </div>
-                        </div>
-
-                        <div className="bento-item">
-                            <img
-                                src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?q=80&w=800&auto=format&fit=crop"
-                                alt="Wedding Ceremony"
-                                className="bento-image"
-                            />
-                            <div className="bento-overlay">
-                                <h5 className="fw-bold">Dream Weddings</h5>
-                            </div>
-                        </div>
-
-                        <div className="bento-item">
-                            <img
-                                src="https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=800&auto=format&fit=crop"
-                                alt="Birthday Celebration"
-                                className="bento-image"
-                            />
-                            <div className="bento-overlay">
-                                <h5 className="fw-bold">Birthday Parties</h5>
-                            </div>
-                        </div>
-
-                        <div className="bento-item bento-tall">
-                            <img
-                                src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop"
-                                alt="Live Concert"
-                                className="bento-image"
-                            />
-                            <div className="bento-overlay">
-                                <h5 className="fw-bold">Live Concerts</h5>
-                            </div>
-                        </div>
-
-                        <div className="bento-item">
-                            <img
-                                src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=800&auto=format&fit=crop"
-                                alt="Grand Reception"
-                                className="bento-image"
-                            />
-                            <div className="bento-overlay">
-                                <h5 className="fw-bold">Grand Receptions</h5>
-                            </div>
-                        </div>
-
-                        <div className="bento-item">
-                            <img
-                                src="https://images.unsplash.com/photo-1530023367847-a683933f4172?q=80&w=800&auto=format&fit=crop"
-                                alt="Stage Production"
-                                className="bento-image"
-                            />
-                            <div className="bento-overlay">
-                                <h5 className="fw-bold">Stage Productions</h5>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Mixed-Media Carousel with Swiper */}
+                    <Swiper
+                        modules={[Autoplay, Navigation, Pagination]}
+                        spaceBetween={20}
+                        slidesPerView={1}
+                        loop={true}
+                        autoplay={{
+                            delay: 3000,
+                            disableOnInteraction: false,
+                        }}
+                        navigation={true}
+                        pagination={{ clickable: true }}
+                        breakpoints={{
+                            768: { slidesPerView: 2 },
+                            1024: { slidesPerView: 3 },
+                        }}
+                        className="moments-carousel"
+                    >
+                        {[
+                            { type: 'image', src: 'https://images.unsplash.com/photo-1519167758481-83f29da8c8d0?q=80&w=1200&auto=format&fit=crop', title: 'Corporate Galas', subtitle: 'Professional events with impact' },
+                            { type: 'video', src: 'https://cdn.coverr.co/videos/coverr-wedding-celebration-3533/1080p.mp4', title: 'Dream Weddings', subtitle: 'Unforgettable ceremonies' },
+                            { type: 'image', src: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=800&auto=format&fit=crop', title: 'Birthday Celebrations', subtitle: 'Making milestones memorable' },
+                            { type: 'video', src: 'https://cdn.coverr.co/videos/coverr-concert-crowd-3832/1080p.mp4', title: 'Live Concerts', subtitle: 'Energetic performances' },
+                            { type: 'image', src: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=800&auto=format&fit=crop', title: 'Grand Receptions', subtitle: 'Elegant gatherings' },
+                            { type: 'video', src: 'https://cdn.coverr.co/videos/coverr-party-celebration-8127/1080p.mp4', title: 'Festival Parties', subtitle: 'Vibrant celebrations' },
+                            { type: 'image', src: 'https://images.unsplash.com/photo-1530023367847-a683933f4172?q=80&w=800&auto=format&fit=crop', title: 'Stage Productions', subtitle: 'Theatrical excellence' },
+                        ].map((moment, idx) => (
+                            <SwiperSlide key={idx}>
+                                <div className="moment-card position-relative overflow-hidden rounded-4 shadow-lg" style={{ height: '400px' }}>
+                                    {moment.type === 'image' ? (
+                                        <img
+                                            src={moment.src}
+                                            alt={moment.title}
+                                            className="w-100 h-100 object-fit-cover"
+                                            style={{ objectFit: 'cover' }}
+                                        />
+                                    ) : (
+                                        <video
+                                            src={moment.src}
+                                            className="w-100 h-100 object-fit-cover"
+                                            style={{ objectFit: 'cover' }}
+                                            autoPlay
+                                            muted
+                                            loop
+                                            playsInline
+                                        />
+                                    )}
+                                    <div className="moment-overlay position-absolute bottom-0 start-0 w-100 p-4" style={{
+                                        background: 'linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent)',
+                                        color: 'white'
+                                    }}>
+                                        <h4 className="fw-bold mb-1">{moment.title}</h4>
+                                        <p className="mb-0 opacity-75">{moment.subtitle}</p>
+                                    </div>
+                                </div>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
                 </Container>
             </section>
 

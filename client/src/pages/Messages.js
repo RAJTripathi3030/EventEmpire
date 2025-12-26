@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, ListGroup, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, ListGroup, Form, Button, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const Messages = () => {
     const [conversations, setConversations] = useState([]);
     const [currentChat, setCurrentChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const { user } = useContext(AuthContext);
     const [searchParams] = useSearchParams();
     const token = localStorage.getItem('token');
@@ -69,24 +71,30 @@ const Messages = () => {
     };
 
     const handleDeleteConversation = async () => {
-        if (window.confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
-            try {
-                await axios.delete(`http://localhost:5000/api/messages/conversations/${currentChat._id}`, config);
-                setConversations(conversations.filter(c => c._id !== currentChat._id));
-                setCurrentChat(null);
-                setMessages([]);
-            } catch (err) {
-                console.error(err);
-                if (err.response) {
-                    const errorMsg = err.response.data?.error || err.response.data?.message || 'Failed to delete conversation';
-                    alert(`Server Error: ${errorMsg}`);
-                } else if (err.request) {
-                    alert('Network Error: No response from server. Please check your connection.');
-                } else {
-                    alert(`Error: ${err.message}`);
+        setShowDeleteModal(false);
+        const deletePromise = axios.delete(`http://localhost:5000/api/messages/conversations/${currentChat._id}`, config);
+
+        toast.promise(
+            deletePromise,
+            {
+                loading: 'Deleting conversation...',
+                success: () => {
+                    setConversations(conversations.filter(c => c._id !== currentChat._id));
+                    setCurrentChat(null);
+                    setMessages([]);
+                    return 'Conversation deleted successfully!';
+                },
+                error: (err) => {
+                    if (err.response) {
+                        return err.response.data?.error || err.response.data?.message || 'Failed to delete conversation';
+                    } else if (err.request) {
+                        return 'Network error. Please check your connection.';
+                    } else {
+                        return `Error: ${err.message}`;
+                    }
                 }
             }
-        }
+        );
     };
 
     const handleSendMessage = async (e) => {
@@ -105,7 +113,7 @@ const Messages = () => {
             }
         } catch (err) {
             console.error(err);
-            alert(err.response?.data?.message || 'Failed to send message');
+            toast.error(err.response?.data?.message || 'Failed to send message');
         }
     };
 
@@ -149,7 +157,7 @@ const Messages = () => {
                             <>
                                 <div className="p-3 border-bottom border-light d-flex justify-content-between align-items-center" style={{ backgroundColor: '#f8f9fa' }}>
                                     <h5 className="m-0 text-dark fw-bold" style={{ fontFamily: 'Playfair Display' }}>{currentChat.name}</h5>
-                                    <Button variant="outline-danger" size="sm" onClick={handleDeleteConversation} className="border-0">
+                                    <Button variant="outline-danger" size="sm" onClick={() => setShowDeleteModal(true)} className="border-0">
                                         <i className="bi bi-trash"></i>
                                     </Button>
                                 </div>
@@ -192,6 +200,29 @@ const Messages = () => {
                     </Col>
                 </Row>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+                <Modal.Header closeButton className="border-0">
+                    <Modal.Title className="fw-bold" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display' }}>
+                        Delete Conversation
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center py-4">
+                    <i className="bi bi-exclamation-triangle text-warning display-1 mb-3"></i>
+                    <p className="mb-0">Are you sure you want to delete this conversation with <strong>{currentChat?.name}</strong>?</p>
+                    <p className="text-muted small mt-2">This action cannot be undone.</p>
+                </Modal.Body>
+                <Modal.Footer className="border-0">
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={handleDeleteConversation}>
+                        <i className="bi bi-trash me-2"></i>
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 };

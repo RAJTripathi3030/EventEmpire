@@ -1,35 +1,35 @@
 import React, { useState, useContext } from 'react';
-import { Container, Form, Button, Alert, Row, Col } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const Register = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user' });
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(false);
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-        setError('');
     };
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
+        setLoading(true);
         try {
             const res = await axios.post('http://localhost:5000/api/auth/register', formData);
-            setSuccess('Registration successful! Redirecting...');
+            toast.success('Registration successful! Welcome to EventEmpire!');
             login(res.data.token, res.data);
             setTimeout(() => {
                 navigate(res.data.role === 'vendor' ? '/vendor-dashboard' : '/dashboard');
-            }, 1000);
+            }, 500);
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || 'Registration failed');
+            toast.error(err.response?.data?.message || 'Registration failed. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -60,12 +60,6 @@ const Register = () => {
                         <p className="text-muted mt-2">Create your free account</p>
                     </div>
 
-                    {error && <Alert variant="danger" className="border-0 shadow-sm">{error}</Alert>}
-                    {success && <Alert variant="success" className="border-0 shadow-sm">{success}</Alert>}
-
-                    {error && <Alert variant="danger" className="border-0 shadow-sm">{error}</Alert>}
-                    {success && <Alert variant="success" className="border-0 shadow-sm">{success}</Alert>}
-
                     <Form onSubmit={handleRegister} className="animate-fade-in">
                         <Form.Group className="mb-4">
                             <Form.Label className="text-uppercase small fw-bold text-muted">Full Name</Form.Label>
@@ -77,6 +71,7 @@ const Register = () => {
                                 required
                                 className="form-control-glass bg-light"
                                 placeholder="Enter your name"
+                                disabled={loading}
                             />
                         </Form.Group>
                         <Form.Group className="mb-4">
@@ -89,6 +84,7 @@ const Register = () => {
                                 required
                                 className="form-control-glass bg-light"
                                 placeholder="name@example.com"
+                                disabled={loading}
                             />
                         </Form.Group>
                         <Form.Group className="mb-4">
@@ -101,6 +97,7 @@ const Register = () => {
                                 required
                                 className="form-control-glass bg-light"
                                 placeholder="Create a strong password"
+                                disabled={loading}
                             />
                         </Form.Group>
                         <Form.Group className="mb-4">
@@ -110,14 +107,26 @@ const Register = () => {
                                 value={formData.role}
                                 onChange={handleChange}
                                 className="form-control-glass bg-light"
+                                disabled={loading}
                             >
                                 <option value="user">User (Planning an Event)</option>
                                 <option value="vendor">Vendor (Offering Services)</option>
                                 <option value="admin">Admin (Management)</option>
                             </Form.Select>
                         </Form.Group>
-                        <Button type="submit" className="w-100 btn-royal-gold py-3 fs-6 shadow-sm">
-                            Create Account
+                        <Button
+                            type="submit"
+                            className="w-100 btn-royal-gold py-3 fs-6 shadow-sm"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Creating Account...
+                                </>
+                            ) : (
+                                'Create Account'
+                            )}
                         </Button>
                     </Form>
                     <div className="text-center mt-5">

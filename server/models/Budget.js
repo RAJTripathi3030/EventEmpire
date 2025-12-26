@@ -17,7 +17,7 @@ const budgetSchema = new mongoose.Schema({
             amount: Number,
             category: {
                 type: String,
-                enum: ['Venue', 'Catering', 'Decorations', 'Other'],
+                enum: ['Venue', 'Catering', 'Decoration', 'Entertainment', 'Other'],
                 default: 'Other',
             },
             date: { type: Date, default: Date.now },

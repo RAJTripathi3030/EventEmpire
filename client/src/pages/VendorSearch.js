@@ -65,11 +65,11 @@ const VendorSearch = () => {
                         <Col key={vendor._id}>
                             <Card className="h-100">
                                 <Card.Body>
-                                    <Card.Title>{vendor.user?.name || 'Vendor'}</Card.Title>
+                                    <Card.Title>{vendor.user?.name || vendor.businessName || 'Vendor'}</Card.Title>
                                     <Card.Subtitle className="mb-2 text-muted">{vendor.serviceType}</Card.Subtitle>
                                     <Card.Text>
-                                        <strong>Location:</strong> {vendor.location}<br />
-                                        <strong>Price:</strong> {vendor.pricing}<br />
+                                        <strong>Location:</strong> {vendor.location?.city || vendor.location?.address || 'N/A'}<br />
+                                        <strong>Price:</strong> {vendor.pricingTiers?.[0] ? `From ₹${vendor.pricingTiers[0].price}` : 'Contact for pricing'}<br />
                                         <small>{vendor.description}</small>
                                     </Card.Text>
                                 </Card.Body>

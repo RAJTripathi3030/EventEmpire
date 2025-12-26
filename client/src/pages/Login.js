@@ -1,38 +1,37 @@
 import React, { useState, useContext } from 'react';
-import { Container, Form, Button, Alert, Row, Col } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [otp, setOtp] = useState('');
     const [step, setStep] = useState(1);
     const [userId, setUserId] = useState(null);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(false);
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-        setError('');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
+        setLoading(true);
         try {
             if (step === 1) {
                 const res = await axios.post('http://localhost:5000/api/auth/login', formData);
                 if (res.data.requiresOtp) {
                     setUserId(res.data.userId);
                     setStep(2);
-                    setSuccess('OTP sent to your email. Please check your inbox.');
+                    toast.success('OTP sent to your email. Please check your inbox.');
                 } else {
                     login(res.data.token, res.data);
-                    navigate('/dashboard');
+                    toast.success('Login successful! Redirecting...');
+                    setTimeout(() => navigate('/dashboard'), 500);
                 }
             } else {
                 const res = await axios.post('http://localhost:5000/api/auth/verify-otp', {
@@ -40,11 +39,14 @@ const Login = () => {
                     otp
                 });
                 login(res.data.token, res.data);
-                navigate(res.data.role === 'vendor' ? '/vendor-dashboard' : '/dashboard');
+                toast.success('Welcome back!');
+                setTimeout(() => navigate(res.data.role === 'vendor' ? '/vendor-dashboard' : '/dashboard'), 500);
             }
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || 'Login failed');
+            toast.error(err.response?.data?.message || 'Login failed. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -73,9 +75,6 @@ const Login = () => {
                         <p className="text-muted mt-2">Log in to your account</p>
                     </div>
 
-                    {error && <Alert variant="danger" className="border-0 shadow-sm">{error}</Alert>}
-                    {success && <Alert variant="success" className="border-0 shadow-sm">{success}</Alert>}
-
                     <Form onSubmit={handleSubmit}>
                         {step === 1 ? (
                             <div className="animate-fade-in">
@@ -89,6 +88,7 @@ const Login = () => {
                                         required
                                         className="form-control-glass bg-light"
                                         placeholder="name@example.com"
+                                        disabled={loading}
                                     />
                                 </Form.Group>
                                 <Form.Group className="mb-4">
@@ -101,10 +101,22 @@ const Login = () => {
                                         required
                                         className="form-control-glass bg-light"
                                         placeholder="Enter your password"
+                                        disabled={loading}
                                     />
                                 </Form.Group>
-                                <Button type="submit" className="w-100 btn-royal-gold py-3 fs-6 shadow-sm">
-                                    Sign In
+                                <Button
+                                    type="submit"
+                                    className="w-100 btn-royal-gold py-3 fs-6 shadow-sm"
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            Signing In...
+                                        </>
+                                    ) : (
+                                        'Sign In'
+                                    )}
                                 </Button>
                                 <div className="text-center mt-3">
                                     <Link to="/forgot-password" style={{ color: 'var(--gold-accent)' }}>Forgot Password?</Link>
@@ -112,9 +124,9 @@ const Login = () => {
                             </div>
                         ) : (
                             <div className="animate-fade-in">
-                                <Alert variant="info" className="bg-light border-0 text-dark mb-4 text-center">
+                                <div className="alert alert-info bg-light border-0 text-dark mb-4 text-center">
                                     <i className="bi bi-envelope-paper me-2"></i> Enter the OTP sent to your email.
-                                </Alert>
+                                </div>
                                 <Form.Group className="mb-4">
                                     <Form.Label className="text-uppercase small fw-bold text-muted">One-Time Password</Form.Label>
                                     <Form.Control
@@ -125,10 +137,22 @@ const Login = () => {
                                         className="form-control-glass bg-light text-center"
                                         style={{ letterSpacing: '2px', fontSize: '1.2rem' }}
                                         placeholder="• • • • • •"
+                                        disabled={loading}
                                     />
                                 </Form.Group>
-                                <Button type="submit" className="w-100 btn-royal-gold py-3 shadow-sm">
-                                    Verify & Login
+                                <Button
+                                    type="submit"
+                                    className="w-100 btn-royal-gold py-3 shadow-sm"
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            Verifying...
+                                        </>
+                                    ) : (
+                                        'Verify & Login'
+                                    )}
                                 </Button>
                             </div>
                         )}

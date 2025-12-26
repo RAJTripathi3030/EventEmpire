@@ -30,6 +30,16 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    // Budget tracking for event planning
+    totalBudget: {
+        type: Number,
+        default: null, // null means no budget limit set
+        min: 0
+    },
+    // Track when budget was last updated
+    budgetUpdatedAt: {
+        type: Date
+    },
     createdAt: {
         type: Date,
         default: Date.now,

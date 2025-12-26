@@ -1,46 +1,48 @@
 import React, { useState } from 'react';
-import { Container, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [step, setStep] = useState(1); // 1: Request OTP, 2: Reset Password
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleRequestOtp = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
+        setLoading(true);
         try {
             await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
             setStep(2);
-            setSuccess('OTP sent to your email. Please check your inbox.');
+            toast.success('OTP sent to your email. Please check your inbox.');
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || 'Failed to send OTP');
+            toast.error(err.response?.data?.message || 'Failed to send OTP. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleResetPassword = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
+        setLoading(true);
         try {
             await axios.post('http://localhost:5000/api/auth/reset-password', {
                 email,
                 otp,
                 newPassword
             });
-            setSuccess('Password reset successful. Redirecting to login...');
-            setTimeout(() => navigate('/login'), 2000);
+            toast.success('Password reset successful! Redirecting to login...');
+            setTimeout(() => navigate('/login'), 1500);
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || 'Failed to reset password');
+            toast.error(err.response?.data?.message || 'Failed to reset password. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -50,9 +52,6 @@ const ForgotPassword = () => {
                 <h2 className="text-center mb-4 fw-bold" style={{ fontFamily: 'Playfair Display', color: 'var(--gold-primary)' }}>
                     {step === 1 ? 'Forgot Password' : 'Reset Password'}
                 </h2>
-
-                {error && <Alert variant="danger" className="text-center border-danger bg-transparent text-danger">{error}</Alert>}
-                {success && <Alert variant="success" className="text-center border-success bg-transparent text-success">{success}</Alert>}
 
                 {step === 1 ? (
                     <Form onSubmit={handleRequestOtp}>
@@ -68,10 +67,22 @@ const ForgotPassword = () => {
                                 required
                                 className="form-control-glass"
                                 placeholder="name@example.com"
+                                disabled={loading}
                             />
                         </Form.Group>
-                        <Button type="submit" className="w-100 btn-royal-gold mb-3">
-                            Send OTP
+                        <Button
+                            type="submit"
+                            className="w-100 btn-royal-gold mb-3"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Sending OTP...
+                                </>
+                            ) : (
+                                'Send OTP'
+                            )}
                         </Button>
                         <Button variant="link" className="w-100 text-light text-decoration-none" onClick={() => navigate('/login')}>
                             <i className="bi bi-arrow-left me-2"></i> Back to Login
@@ -91,6 +102,7 @@ const ForgotPassword = () => {
                                 required
                                 className="form-control-glass"
                                 placeholder="Enter OTP"
+                                disabled={loading}
                             />
                         </Form.Group>
                         <Form.Group className="mb-4">
@@ -102,10 +114,22 @@ const ForgotPassword = () => {
                                 required
                                 className="form-control-glass"
                                 placeholder="Enter new password"
+                                disabled={loading}
                             />
                         </Form.Group>
-                        <Button type="submit" className="w-100 btn-royal-gold mb-3">
-                            Reset Password
+                        <Button
+                            type="submit"
+                            className="w-100 btn-royal-gold mb-3"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Resetting Password...
+                                </>
+                            ) : (
+                                'Reset Password'
+                            )}
                         </Button>
                         <Button variant="link" className="w-100 text-light text-decoration-none" onClick={() => setStep(1)}>
                             <i className="bi bi-arrow-left me-2"></i> Back

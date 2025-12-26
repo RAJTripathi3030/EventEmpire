@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { toastConfig } from './utils/toastConfig';
 
 // Pages
 import Home from './pages/Home';
@@ -10,6 +12,7 @@ import VendorDashboard from './pages/VendorDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EventPage from './pages/EventPage';
 import FindVendors from './pages/FindVendors';
+import VendorBooking from './pages/VendorBooking';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
 import ForgotPassword from './pages/ForgotPassword';
@@ -20,6 +23,10 @@ import { AuthProvider } from './context/AuthContext';
 function App() {
     return (
         <AuthProvider>
+            <Toaster
+                position={toastConfig.position}
+                toastOptions={toastConfig}
+            />
             <Router>
                 <Navbar />
                 <Routes>
@@ -32,6 +39,7 @@ function App() {
                     <Route path="/dashboard" element={<PrivateRoute roles={['user']}><UserDashboard /></PrivateRoute>} />
                     <Route path="/events/:id" element={<PrivateRoute roles={['user']}><EventPage /></PrivateRoute>} />
                     <Route path="/find-vendors" element={<PrivateRoute roles={['user']}><FindVendors /></PrivateRoute>} />
+                    <Route path="/vendor/:vendorId/book" element={<PrivateRoute roles={['user']}><VendorBooking /></PrivateRoute>} />
                     <Route path="/messages" element={<PrivateRoute roles={['user', 'vendor']}><Messages /></PrivateRoute>} />
                     <Route path="/vendor-dashboard" element={<PrivateRoute roles={['vendor']}><VendorDashboard /></PrivateRoute>} />
                     <Route path="/admin-dashboard" element={<PrivateRoute roles={['admin']}><AdminDashboard /></PrivateRoute>} />
