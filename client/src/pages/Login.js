@@ -5,6 +5,9 @@ import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+// Import local asset for offline capability
+import loginBackground from '../assets/login_background.jpg';
+
 const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [otp, setOtp] = useState('');
@@ -54,7 +57,7 @@ const Login = () => {
         <div className="d-flex min-vh-100 align-items-stretch overflow-hidden">
             {/* Left Side - Image/GIF */}
             <div className="d-none d-lg-block w-50 position-relative" style={{
-                backgroundImage: 'url("https://images.unsplash.com/photo-1519225421980-715cb0202128?q=80&w=1000&auto=format&fit=crop")',
+                backgroundImage: `url(${loginBackground})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
             }}>

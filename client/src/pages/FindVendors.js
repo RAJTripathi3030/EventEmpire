@@ -94,7 +94,13 @@ const FindVendors = () => {
                                     </div>
                                 </div>
                                 <div className="p-3 bg-light border-top">
-                                    <Button className="w-100 btn-royal-gold shadow-sm" onClick={() => navigate(`/vendor/${vendor._id}/book`)}>
+                                    <Button
+                                        className="w-100 btn-royal-gold shadow-sm"
+                                        onClick={() => {
+                                            console.log('Navigating to vendor booking - Vendor ID:', vendor._id, 'Vendor Name:', vendor.businessName || vendor.user?.name);
+                                            navigate(`/vendor/${vendor._id}/book`);
+                                        }}
+                                    >
                                         Book This Vendor
                                     </Button>
                                 </div>

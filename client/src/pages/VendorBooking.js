@@ -26,21 +26,32 @@ const VendorBooking = () => {
     const config = { headers: { Authorization: `Bearer ${token}` } };
 
     useEffect(() => {
+        console.log('VendorBooking - vendorId from URL params:', vendorId);
         fetchVendorDetails();
         // eslint-disable-next-line
     }, [vendorId]);
 
     const fetchVendorDetails = async () => {
         try {
-            // Use advanced search to get full vendor details
-            const res = await axios.get(`http://localhost:5000/api/vendors/search/advanced?_id=${vendorId}`);
-            if (res.data.vendors && res.data.vendors.length > 0) {
-                setVendor(res.data.vendors[0]);
+            console.log('Fetching vendor details for ID:', vendorId);
+
+            // FIXED: Use direct vendor profile lookup instead of advanced search
+            // The advanced search endpoint doesn't support _id parameter filtering
+            // So we fetch the vendor directly by their MongoDB _id
+            const res = await axios.get(`http://localhost:5000/api/vendors/${vendorId}`);
+            console.log('Vendor API response:', res.data);
+
+            if (res.data) {
+                setVendor(res.data);
+                console.log('Vendor loaded successfully:', res.data.businessName || res.data.userDetails?.name);
+            } else {
+                console.warn('No vendor found with ID:', vendorId);
+                toast.error(`Vendor not found (ID: ${vendorId})`);
             }
             setLoading(false);
         } catch (err) {
-            console.error(err);
-            toast.error('Failed to load vendor details');
+            console.error('Error fetching vendor details:', err);
+            toast.error('Failed to load vendor details. Please try again.');
             setLoading(false);
         }
     };

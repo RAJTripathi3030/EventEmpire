@@ -5,6 +5,9 @@ import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+// Import local asset for offline capability
+import registerBackground from '../assets/register_background.jpg';
+
 const Register = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user' });
     const [loading, setLoading] = useState(false);
@@ -39,7 +42,7 @@ const Register = () => {
         <div className="d-flex min-vh-100 align-items-stretch overflow-hidden">
             {/* Left Side - Image/Visuals */}
             <div className="d-none d-lg-block w-50 position-relative" style={{
-                backgroundImage: 'url("https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=2070&auto=format&fit=crop")',
+                backgroundImage: `url(${registerBackground})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
             }}>

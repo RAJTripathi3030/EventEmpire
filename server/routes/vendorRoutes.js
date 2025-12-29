@@ -48,6 +48,20 @@ router.get('/search', async (req, res) => {
     }
 });
 
+// Public route to get a single vendor by ID
+router.get('/:id', async (req, res) => {
+    try {
+        const vendor = await vendorService.getVendorById(req.params.id);
+        if (!vendor) {
+            return res.status(404).json({ message: 'Vendor not found' });
+        }
+        res.json(vendor);
+    } catch (error) {
+        console.error('Get vendor by ID error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Protected routes
 router.use(authMiddleware.protect);
 

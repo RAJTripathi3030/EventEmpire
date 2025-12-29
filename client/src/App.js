@@ -16,6 +16,7 @@ import VendorBooking from './pages/VendorBooking';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
 import ForgotPassword from './pages/ForgotPassword';
+import VendorRegistration from './pages/VendorRegistration';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import { AuthProvider } from './context/AuthContext';
@@ -42,6 +43,7 @@ function App() {
                     <Route path="/vendor/:vendorId/book" element={<PrivateRoute roles={['user']}><VendorBooking /></PrivateRoute>} />
                     <Route path="/messages" element={<PrivateRoute roles={['user', 'vendor']}><Messages /></PrivateRoute>} />
                     <Route path="/vendor-dashboard" element={<PrivateRoute roles={['vendor']}><VendorDashboard /></PrivateRoute>} />
+                    <Route path="/vendor-registration" element={<PrivateRoute roles={['vendor']}><VendorRegistration /></PrivateRoute>} />
                     <Route path="/admin-dashboard" element={<PrivateRoute roles={['admin']}><AdminDashboard /></PrivateRoute>} />
                     <Route path="/profile" element={<PrivateRoute roles={['user', 'vendor', 'admin']}><Profile /></PrivateRoute>} />
                 </Routes>

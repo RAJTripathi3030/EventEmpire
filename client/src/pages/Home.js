@@ -10,6 +10,19 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
+// Import local assets for offline capability
+import heroWedding from '../assets/hero_wedding.gif';
+import heroParty from '../assets/hero_party.gif';
+import heroGraduation from '../assets/hero_graduation.gif';
+import momentCorporate from '../assets/moment_corporate.jpg';
+import momentBirthday from '../assets/moment_birthday.jpg';
+import momentReception from '../assets/moment_reception.jpg';
+import momentStage from '../assets/moment_stage.jpg';
+import momentWeddingVideo from '../assets/moment_wedding.mp4';
+import momentConcertVideo from '../assets/moment_concert.mp4';
+import momentFestivalVideo from '../assets/moment_festival.mp4';
+import ctaCelebration from '../assets/cta_celebration.gif';
+
 const Home = () => {
     const [stats, setStats] = useState({ users: 0, vendors: 0, events: 0 });
 
@@ -33,17 +46,17 @@ const Home = () => {
                 <Carousel fade interval={4000} controls={false} indicators={true} className="h-100">
                     {[
                         {
-                            image: "https://media.giphy.com/media/g5R9dok94mrIvplmZd/giphy.gif",
+                            image: heroWedding,
                             title: "Stunning Weddings",
                             subtitle: "Create the royal celebration you've always imagined."
                         },
                         {
-                            image: "https://media.giphy.com/media/KYElw07kzDspaBOwf9/giphy.gif",
+                            image: heroParty,
                             title: "Vibrant Parties",
                             subtitle: "From birthdays to farewells, make every moment count."
                         },
                         {
-                            image: "https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif",
+                            image: heroGraduation,
                             title: "Graduation Galas",
                             subtitle: "Celebrate milestones with elegance and style."
                         }
@@ -227,13 +240,13 @@ const Home = () => {
                         className="moments-carousel"
                     >
                         {[
-                            { type: 'image', src: 'https://images.unsplash.com/photo-1519167758481-83f29da8c8d0?q=80&w=1200&auto=format&fit=crop', title: 'Corporate Galas', subtitle: 'Professional events with impact' },
-                            { type: 'video', src: 'https://cdn.coverr.co/videos/coverr-wedding-celebration-3533/1080p.mp4', title: 'Dream Weddings', subtitle: 'Unforgettable ceremonies' },
-                            { type: 'image', src: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=800&auto=format&fit=crop', title: 'Birthday Celebrations', subtitle: 'Making milestones memorable' },
-                            { type: 'video', src: 'https://cdn.coverr.co/videos/coverr-concert-crowd-3832/1080p.mp4', title: 'Live Concerts', subtitle: 'Energetic performances' },
-                            { type: 'image', src: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=800&auto=format&fit=crop', title: 'Grand Receptions', subtitle: 'Elegant gatherings' },
-                            { type: 'video', src: 'https://cdn.coverr.co/videos/coverr-party-celebration-8127/1080p.mp4', title: 'Festival Parties', subtitle: 'Vibrant celebrations' },
-                            { type: 'image', src: 'https://images.unsplash.com/photo-1530023367847-a683933f4172?q=80&w=800&auto=format&fit=crop', title: 'Stage Productions', subtitle: 'Theatrical excellence' },
+                            { type: 'image', src: momentCorporate, title: 'Corporate Galas', subtitle: 'Professional events with impact' },
+                            { type: 'video', src: momentWeddingVideo, title: 'Dream Weddings', subtitle: 'Unforgettable ceremonies' },
+                            { type: 'image', src: momentBirthday, title: 'Birthday Celebrations', subtitle: 'Making milestones memorable' },
+                            { type: 'video', src: momentConcertVideo, title: 'Live Concerts', subtitle: 'Energetic performances' },
+                            { type: 'image', src: momentReception, title: 'Grand Receptions', subtitle: 'Elegant gatherings' },
+                            { type: 'video', src: momentFestivalVideo, title: 'Festival Parties', subtitle: 'Vibrant celebrations' },
+                            { type: 'image', src: momentStage, title: 'Stage Productions', subtitle: 'Theatrical excellence' },
                         ].map((moment, idx) => (
                             <SwiperSlide key={idx}>
                                 <div className="moment-card position-relative overflow-hidden rounded-4 shadow-lg" style={{ height: '400px' }}>
@@ -308,7 +321,7 @@ const Home = () => {
             {/* Final CTA */}
             <section className="py-5 text-center position-relative overflow-hidden" style={{
                 background: 'linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-primary) 100%)',
-                backgroundImage: 'url("https://media.giphy.com/media/26tPnAAJxXTvpLwJy/giphy.gif")',
+                backgroundImage: `url(${ctaCelebration})`,
                 backgroundSize: 'cover',
                 backgroundBlendMode: 'overlay'
             }}>

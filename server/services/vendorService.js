@@ -303,6 +303,15 @@ const getAvailability = async (vendorId, startDate, endDate) => {
     return filtered;
 };
 
+/**
+ * Get a single vendor by ID
+ * Used for vendor booking page to display specific vendor details
+ */
+const getVendorById = async (vendorId) => {
+    const vendor = await VendorProfile.findById(vendorId).populate('user', 'name email');
+    return vendor;
+};
+
 module.exports = {
     createOrUpdateProfile,
     getVendorProfile,
@@ -310,5 +319,6 @@ module.exports = {
     advancedSearch,
     addPortfolioImage,
     addReview,
-    getAvailability
+    getAvailability,
+    getVendorById
 };

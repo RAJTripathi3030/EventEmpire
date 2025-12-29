@@ -114,7 +114,21 @@ const VendorDashboard = () => {
                                 <Col md={10} className="mx-auto">
                                     <div className="glass-card p-4 bg-white text-dark shadow-lg">
                                         {!profile && !isEditing && (
-                                            <Alert variant="info" className="border-info text-info bg-light">You haven't set up your profile yet. Click Edit to start.</Alert>
+                                            <Alert variant="warning" className="border-warning text-dark bg-light mb-4">
+                                                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                                                    <div>
+                                                        <h5 className="mb-2"><i className="bi bi-exclamation-triangle me-2"></i>Profile Incomplete</h5>
+                                                        <p className="mb-0">Complete your vendor profile to start receiving bookings from clients!</p>
+                                                    </div>
+                                                    <Button
+                                                        className="btn-royal-gold"
+                                                        onClick={() => window.location.href = '/vendor-registration'}
+                                                    >
+                                                        <i className="bi bi-pencil-square me-2"></i>
+                                                        Complete Profile
+                                                    </Button>
+                                                </div>
+                                            </Alert>
                                         )}
 
                                         {isEditing ? (
@@ -178,7 +192,10 @@ const VendorDashboard = () => {
                                             <div>
                                                 <div className="d-flex justify-content-between align-items-start mb-4">
                                                     <h3 style={{ color: 'var(--gold-primary)' }} className="fw-bold">Business Profile</h3>
-                                                    <Button className="btn-glass text-dark border-secondary" onClick={() => setIsEditing(true)}>
+                                                    <Button
+                                                        className="btn-royal-gold"
+                                                        onClick={() => window.location.href = '/vendor-registration'}
+                                                    >
                                                         <i className="bi bi-pencil me-2"></i> Edit Profile
                                                     </Button>
                                                 </div>
