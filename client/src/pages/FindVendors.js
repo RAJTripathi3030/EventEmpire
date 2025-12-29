@@ -61,13 +61,22 @@ const FindVendors = () => {
                                 />
                             </Col>
                             <Col md={5}>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Service Type (e.g. Catering, Photography)"
+                                <Form.Select
                                     value={filters.serviceType}
                                     onChange={(e) => setFilters({ ...filters, serviceType: e.target.value })}
                                     className="form-control-glass bg-light"
-                                />
+                                >
+                                    <option value="">All Service Types</option>
+                                    <option value="Catering">Catering</option>
+                                    <option value="Photography">Photography</option>
+                                    <option value="DJ">DJ / Music</option>
+                                    <option value="Venue">Venue</option>
+                                    <option value="Decor">Decoration</option>
+                                    <option value="Planning">Event Planning</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Transportation">Transportation</option>
+                                    <option value="Other">Other</option>
+                                </Form.Select>
                             </Col>
                             <Col md={2}>
                                 <Button type="submit" className="w-100 h-100 btn-royal-gold shadow-sm">Search</Button>

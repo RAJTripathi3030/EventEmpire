@@ -24,9 +24,19 @@ const Messages = () => {
     useEffect(() => {
         const chatWithId = searchParams.get('chatWith');
         if (chatWithId) {
-            const existingConversation = conversations.find(c => c._id === chatWithId);
+            const existingConversation = conversations.find(c => {
+                const cId = typeof c._id === 'string' ? c._id : String(c._id);
+                return cId === chatWithId;
+            });
             if (existingConversation) {
-                setCurrentChat(existingConversation);
+                // Normalize the user object to ensure _id is a string
+                const normalizedChat = {
+                    ...existingConversation,
+                    _id: typeof existingConversation._id === 'string'
+                        ? existingConversation._id
+                        : String(existingConversation._id)
+                };
+                setCurrentChat(normalizedChat);
             } else {
                 fetchUserDetails(chatWithId);
             }
@@ -63,16 +73,26 @@ const Messages = () => {
 
     const fetchMessages = async (userId) => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/messages/${userId}`, config);
+            // Ensure userId is a string
+            const userIdString = typeof userId === 'string' ? userId : String(userId);
+
+            // Validate it's a proper ObjectId format
+            if (!/^[0-9a-fA-F]{24}$/.test(userIdString)) {
+                console.error('Invalid userId format for fetchMessages:', userIdString);
+                return;
+            }
+
+            const res = await axios.get(`http://localhost:5000/api/messages/${userIdString}`, config);
             setMessages(res.data);
         } catch (err) {
-            console.error(err);
+            console.error('Error fetching messages:', err);
         }
     };
 
     const handleDeleteConversation = async () => {
         setShowDeleteModal(false);
-        const deletePromise = axios.delete(`http://localhost:5000/api/messages/conversations/${currentChat._id}`, config);
+        const chatId = typeof currentChat._id === 'string' ? currentChat._id : String(currentChat._id);
+        const deletePromise = axios.delete(`http://localhost:5000/api/messages/conversations/${chatId}`, config);
 
         toast.promise(
             deletePromise,
@@ -102,8 +122,40 @@ const Messages = () => {
         if (!newMessage.trim() || !currentChat) return;
 
         try {
+            // Debug: Log the currentChat object to see its structure
+            console.log('Current chat object:', currentChat);
+            console.log('Current chat _id:', currentChat._id);
+            console.log('Type of _id:', typeof currentChat._id);
+
+            // Multiple fallback methods to extract the actual ID string
+            let receiverId;
+            if (typeof currentChat._id === 'string') {
+                receiverId = currentChat._id;
+            } else if (currentChat._id && currentChat._id.$oid) {
+                // MongoDB extended JSON format
+                receiverId = currentChat._id.$oid;
+            } else if (currentChat._id && typeof currentChat._id.toString === 'function') {
+                receiverId = currentChat._id.toString();
+            } else if (currentChat._id && currentChat._id.toHexString) {
+                // ObjectId has toHexString method
+                receiverId = currentChat._id.toHexString();
+            } else {
+                // Last resort: try to extract from object
+                receiverId = String(currentChat._id);
+            }
+
+            console.log('Extracted receiverId:', receiverId);
+            console.log('ReceiverID type:', typeof receiverId);
+
+            // Validate that we have a proper ObjectId string (24 hex characters)
+            if (!receiverId || receiverId === '[object Object]' || !/^[0-9a-fA-F]{24}$/.test(receiverId)) {
+                toast.error('Invalid receiver ID. Please try selecting the conversation again.');
+                console.error('Invalid receiverId after extraction:', receiverId);
+                return;
+            }
+
             const res = await axios.post('http://localhost:5000/api/messages', {
-                receiverId: currentChat._id,
+                receiverId: receiverId,
                 content: newMessage
             }, config);
             setMessages([...messages, res.data]);
@@ -112,7 +164,8 @@ const Messages = () => {
                 fetchConversations();
             }
         } catch (err) {
-            console.error(err);
+            console.error('Error sending message:', err);
+            console.error('Error response:', err.response?.data);
             toast.error(err.response?.data?.message || 'Failed to send message');
         }
     };
@@ -132,7 +185,14 @@ const Messages = () => {
                                         key={c._id}
                                         action
                                         active={currentChat?._id === c._id}
-                                        onClick={() => setCurrentChat(c)}
+                                        onClick={() => {
+                                            // Normalize the user object to ensure _id is a string
+                                            const normalizedChat = {
+                                                ...c,
+                                                _id: typeof c._id === 'string' ? c._id : String(c._id)
+                                            };
+                                            setCurrentChat(normalizedChat);
+                                        }}
                                         className={`bg-transparent text-dark border-bottom border-light ${currentChat?._id === c._id ? 'bg-white shadow-sm' : ''}`}
                                         style={{ cursor: 'pointer', transition: 'background-color 0.2s' }}
                                     >
