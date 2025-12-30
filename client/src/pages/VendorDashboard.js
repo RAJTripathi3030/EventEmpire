@@ -3,6 +3,8 @@ import { Container, Form, Button, Row, Col, Alert, Tab, Nav, Card, Modal, Image,
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import Messages from './Messages';
+import VendorPaymentHistory from '../components/VendorPaymentHistory';
+import VendorWorkManager from '../components/VendorWorkManager';
 
 const VendorDashboard = () => {
     const [profile, setProfile] = useState(null);
@@ -106,6 +108,9 @@ const VendorDashboard = () => {
                         <Nav.Item>
                             <Nav.Link eventKey="portfolio" className="text-dark fw-bold mx-2">Portfolio</Nav.Link>
                         </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey="payments" className="text-dark fw-bold mx-2">Payments & Work</Nav.Link>
+                        </Nav.Item>
                     </Nav>
 
                     <Tab.Content>
@@ -202,20 +207,60 @@ const VendorDashboard = () => {
                                                 <Row className="gy-4">
                                                     <Col md={6}>
                                                         <div className="p-3 rounded bg-light border-start border-4 border-warning">
+                                                            <p className="mb-1 text-muted small fw-bold text-uppercase">Business Name</p>
+                                                            <p className="fs-5 fw-bold text-dark mb-0">{profile?.businessName || 'N/A'}</p>
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <div className="p-3 rounded bg-light border-start border-4 border-warning">
                                                             <p className="mb-1 text-muted small fw-bold text-uppercase">Service Type</p>
                                                             <p className="fs-5 fw-bold text-dark mb-0">{profile?.serviceType || 'N/A'}</p>
                                                         </div>
                                                     </Col>
                                                     <Col md={6}>
                                                         <div className="p-3 rounded bg-light border-start border-4 border-warning">
+                                                            <p className="mb-1 text-muted small fw-bold text-uppercase">Email</p>
+                                                            <p className="fs-5 fw-bold text-dark mb-0">{profile?.email || 'N/A'}</p>
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <div className="p-3 rounded bg-light border-start border-4 border-warning">
+                                                            <p className="mb-1 text-muted small fw-bold text-uppercase">Contact Phone</p>
+                                                            <p className="fs-5 fw-bold text-dark mb-0">{profile?.contactPhone || 'N/A'}</p>
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <div className="p-3 rounded bg-light border-start border-4 border-warning">
                                                             <p className="mb-1 text-muted small fw-bold text-uppercase">Location</p>
-                                                            <p className="fs-5 fw-bold text-dark mb-0">{profile?.location || 'N/A'}</p>
+                                                            <p className="fs-5 fw-bold text-dark mb-0">
+                                                                {profile?.location?.city && profile?.location?.state
+                                                                    ? `${profile.location.city}, ${profile.location.state}`
+                                                                    : 'N/A'}
+                                                            </p>
+                                                        </div>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <div className="p-3 rounded bg-light border-start border-4 border-warning">
+                                                            <p className="mb-1 text-muted small fw-bold text-uppercase">Experience</p>
+                                                            <p className="fs-5 fw-bold text-dark mb-0">
+                                                                {profile?.yearsOfExperience ? `${profile.yearsOfExperience} years` : 'N/A'}
+                                                            </p>
                                                         </div>
                                                     </Col>
                                                     <Col md={12}>
                                                         <div className="p-3 rounded bg-light border-start border-4 border-warning">
-                                                            <p className="mb-1 text-muted small fw-bold text-uppercase">Pricing</p>
-                                                            <p className="fs-5 fw-bold text-dark mb-0">{profile?.pricing || 'N/A'}</p>
+                                                            <p className="mb-1 text-muted small fw-bold text-uppercase">Pricing Packages</p>
+                                                            {profile?.pricingTiers?.length > 0 ? (
+                                                                <div className="d-flex flex-wrap gap-2 mt-2">
+                                                                    {profile.pricingTiers.map((tier, idx) => (
+                                                                        <Badge key={idx} bg="warning" text="dark" className="px-3 py-2">
+                                                                            {tier.packageName}: ₹{tier.price}
+                                                                        </Badge>
+                                                                    ))}
+                                                                </div>
+                                                            ) : (
+                                                                <p className="fs-5 fw-bold text-dark mb-0">N/A</p>
+                                                            )}
                                                         </div>
                                                     </Col>
                                                     <Col md={12}>
@@ -262,6 +307,11 @@ const VendorDashboard = () => {
                                     <p className="lead">No images in portfolio yet. Add some to showcase your work!</p>
                                 </div>
                             )}
+                        </Tab.Pane>
+
+                        <Tab.Pane eventKey="payments">
+                            <VendorPaymentHistory />
+                            <VendorWorkManager />
                         </Tab.Pane>
                     </Tab.Content>
                 </Tab.Container>

@@ -80,4 +80,76 @@ const sendInvitation = async (guestId, userId, customMessage) => {
     }
 };
 
-module.exports = { addGuest, getGuests, sendInvitation };
+/**
+ * Update guest RSVP status
+ * @param {String} guestId - Guest ID
+ * @param {String} status - RSVP status (accepted, rejected)
+ */
+const updateRSVP = async (guestId, status) => {
+    const guest = await Guest.findById(guestId);
+    if (!guest) throw new Error('Guest not found');
+
+    if (!['accepted', 'rejected'].includes(status)) {
+        throw new Error('Invalid RSVP status');
+    }
+
+    guest.rsvpStatus = status;
+    guest.rsvpDate = new Date();
+    await guest.save();
+
+    return guest;
+};
+
+/**
+ * Get pending RSVP guests for an event
+ * Used for sending reminders
+ * @param {String} eventId - Event ID
+ * @param {Number} daysBeforeEvent - Number of days before event to check
+ */
+const getPendingRSVPGuests = async (eventId, daysBeforeEvent = 7) => {
+    const event = await Event.findById(eventId);
+    if (!event) throw new Error('Event not found');
+
+    const eventDate = new Date(event.date);
+    const today = new Date();
+    const daysUntilEvent = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+
+    // Only return if event is within the specified days
+    if (daysUntilEvent > daysBeforeEvent || daysUntilEvent < 0) {
+        return [];
+    }
+
+    const pendingGuests = await Guest.find({
+        event: eventId,
+        rsvpStatus: 'pending'
+    });
+
+    return pendingGuests.map(guest => ({
+        ...guest.toObject(),
+        daysUntilEvent,
+        eventDetails: {
+            name: event.name,
+            date: event.date,
+            location: event.location,
+            organizerName: event.organizerName
+        }
+    }));
+};
+
+/**
+ * Get guest by email for guest login
+ * @param {String} email - Guest email
+ */
+const getGuestByEmail = async (email) => {
+    const guests = await Guest.find({ email }).populate('event');
+    return guests;
+};
+
+module.exports = {
+    addGuest,
+    getGuests,
+    sendInvitation,
+    updateRSVP,
+    getPendingRSVPGuests,
+    getGuestByEmail
+};

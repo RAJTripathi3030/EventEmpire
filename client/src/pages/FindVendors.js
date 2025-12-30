@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Button, Form, Modal, Image, Badge } from 'react-bootstrap';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const FindVendors = () => {
@@ -9,18 +9,32 @@ const FindVendors = () => {
     const [filters, setFilters] = useState({ location: '', serviceType: '' });
     const [selectedVendor, setSelectedVendor] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalVendors, setTotalVendors] = useState(0);
+    const [dateFilter, setDateFilter] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+    const eventId = new URLSearchParams(location.search).get('eventId');
 
     useEffect(() => {
         fetchVendors();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [currentPage, dateFilter]);
 
     const fetchVendors = async () => {
         try {
-            const params = new URLSearchParams(filters).toString();
+            const params = new URLSearchParams({
+                ...filters,
+                page: currentPage,
+                limit: 10,
+                date: dateFilter
+            }).toString();
             const res = await axios.get(`http://localhost:5000/api/vendors/search?${params}`);
-            setVendors(res.data);
+            setVendors(res.data.vendors || []);
+            setTotalPages(res.data.totalPages || 1);
+            setTotalVendors(res.data.totalVendors || 0);
+            setCurrentPage(res.data.currentPage || 1);
         } catch (err) {
             console.error(err);
         }
@@ -81,6 +95,21 @@ const FindVendors = () => {
                             <Col md={2}>
                                 <Button type="submit" className="w-100 h-100 btn-royal-gold shadow-sm">Search</Button>
                             </Col>
+                            <Col md={12} className="mt-3">
+                                <Form.Control
+                                    type="date"
+                                    placeholder="Filter by event date"
+                                    value={dateFilter}
+                                    onChange={(e) => {
+                                        setDateFilter(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
+                                    className="form-control-glass bg-light"
+                                />
+                                <Form.Text className="text-muted">
+                                    Show only vendors available on this date
+                                </Form.Text>
+                            </Col>
                         </Row>
                     </Form>
                 </div>
@@ -107,7 +136,7 @@ const FindVendors = () => {
                                         className="w-100 btn-royal-gold shadow-sm"
                                         onClick={() => {
                                             console.log('Navigating to vendor booking - Vendor ID:', vendor._id, 'Vendor Name:', vendor.businessName || vendor.user?.name);
-                                            navigate(`/vendor/${vendor._id}/book`);
+                                            navigate(`/vendor/${vendor._id}/book${eventId ? `?eventId=${eventId}` : ''}`);
                                         }}
                                     >
                                         Book This Vendor
@@ -126,6 +155,36 @@ const FindVendors = () => {
                     )}
                 </Row>
 
+                {/* Pagination Controls */}
+                {vendors.length > 0 && (
+                    <div className="d-flex justify-content-between align-items-center mt-5 p-4 glass-card bg-white">
+                        <p className="text-muted mb-0">
+                            Showing {((currentPage - 1) * 10) + 1}-{Math.min(currentPage * 10, totalVendors)} of {totalVendors} vendors
+                        </p>
+                        <div className="d-flex gap-2">
+                            <Button
+                                variant="outline-secondary"
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(prev => prev - 1)}
+                                className="btn-glass"
+                            >
+                                <i className="bi bi-chevron-left"></i> Previous
+                            </Button>
+                            <span className="align-self-center px-3 fw-bold">
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <Button
+                                variant="outline-secondary"
+                                disabled={currentPage === totalPages}
+                                onClick={() => setCurrentPage(prev => prev + 1)}
+                                className="btn-glass"
+                            >
+                                Next <i className="bi bi-chevron-right"></i>
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Vendor Details Modal */}
                 <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered contentClassName="border-0 shadow-lg">
                     <Modal.Header closeButton className="bg-light border-0">
@@ -137,6 +196,7 @@ const FindVendors = () => {
                                 <h5 className="mb-3" style={{ color: 'var(--gold-primary)' }}>Details</h5>
                                 <div className="p-3 bg-light rounded mb-3">
                                     <p className="mb-2"><strong>Service:</strong> {selectedVendor?.serviceType}</p>
+                                    <p className="mb-2"><strong>Email:</strong> {selectedVendor?.email || 'Not provided'}</p>
                                     <p className="mb-2"><strong>Location:</strong> {selectedVendor?.location?.city ? `${selectedVendor.location.city}, ${selectedVendor.location.state}` : 'N/A'}</p>
                                     <p className="mb-0"><strong>Pricing:</strong> {selectedVendor?.pricingTiers?.[0] ? `From ₹${selectedVendor.pricingTiers[0].price}/${selectedVendor.pricingTiers[0].packageName}` : 'Contact for pricing'}</p>
                                 </div>
@@ -167,7 +227,55 @@ const FindVendors = () => {
                         <Button variant="link" className="text-secondary text-decoration-none" onClick={() => setShowModal(false)}>
                             Close
                         </Button>
-                        <Button className="btn-royal-gold" onClick={() => handleMessage(selectedVendor?.user?._id)}>
+                        <Button className="btn-royal-gold" onClick={() => {
+                            const userField = selectedVendor?.user;
+                            let vendorUserId = null;
+
+                            console.log('=== Contact Vendor Debug ===');
+                            console.log('User field:', userField);
+                            console.log('User field type:', typeof userField);
+
+                            // Extract ID from various formats
+                            if (typeof userField === 'string' && /^[0-9a-fA-F]{24}$/.test(userField)) {
+                                // Already a valid string ID
+                                vendorUserId = userField;
+                            } else if (userField && typeof userField === 'object') {
+                                // Inspect the object to find the ID
+                                console.log('User field keys:', Object.keys(userField));
+                                console.log('User field._id:', userField._id);
+                                console.log('User field._id type:', typeof userField._id);
+
+                                // Try to get _id as string
+                                const idField = userField._id;
+                                if (typeof idField === 'string') {
+                                    vendorUserId = idField;
+                                } else if (idField && typeof idField === 'object') {
+                                    // ObjectId might have special properties
+                                    console.log('_id object keys:', Object.keys(idField));
+                                    // Try common ObjectId properties
+                                    if (idField.id) vendorUserId = idField.id;
+                                    else if (idField.$oid) vendorUserId = idField.$oid;
+                                    // Last resort: try to extract from JSON
+                                    else {
+                                        try {
+                                            const jsonStr = JSON.stringify(idField);
+                                            console.log('_id as JSON:', jsonStr);
+                                        } catch (e) {
+                                            console.error('Cannot stringify _id');
+                                        }
+                                    }
+                                }
+                            }
+
+                            console.log('Final extracted ID:', vendorUserId);
+                            console.log('=== End Debug ===');
+
+                            if (vendorUserId && /^[0-9a-fA-F]{24}$/.test(vendorUserId)) {
+                                handleMessage(vendorUserId);
+                            } else {
+                                alert('Unable to message this vendor. Please check the console for details.');
+                            }
+                        }}>
                             Contact Vendor
                         </Button>
                     </Modal.Footer>

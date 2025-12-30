@@ -44,7 +44,7 @@ const Messages = () => {
     }, [searchParams, conversations]);
 
     useEffect(() => {
-        if (currentChat) {
+        if (currentChat && currentChat._id && currentChat._id !== '[object Object]') {
             fetchMessages(currentChat._id);
             const interval = setInterval(() => fetchMessages(currentChat._id), 5000);
             return () => clearInterval(interval);
@@ -53,11 +53,18 @@ const Messages = () => {
 
     const fetchUserDetails = async (userId) => {
         try {
+            // Validate userId before making API call
+            if (!userId || userId === '[object Object]' || !/^[0-9a-fA-F]{24}$/.test(userId)) {
+                console.error('Invalid userId passed to fetchUserDetails:', userId);
+                setCurrentChat({ _id: null, name: 'Unknown User' });
+                return;
+            }
+
             const res = await axios.get(`http://localhost:5000/api/auth/${userId}`);
             setCurrentChat(res.data);
         } catch (err) {
-            console.error(err);
-            // Fallback if fetch fails, though unlikely with valid ID
+            console.error('Error fetching user details:', err);
+            // Fallback if fetch fails
             setCurrentChat({ _id: userId, name: 'Unknown User' });
         }
     };
@@ -73,12 +80,27 @@ const Messages = () => {
 
     const fetchMessages = async (userId) => {
         try {
-            // Ensure userId is a string
-            const userIdString = typeof userId === 'string' ? userId : String(userId);
+            // Extract string ID from various formats
+            let userIdString;
 
-            // Validate it's a proper ObjectId format
+            if (typeof userId === 'string') {
+                userIdString = userId;
+            } else if (userId && userId.$oid) {
+                // MongoDB extended JSON format
+                userIdString = userId.$oid;
+            } else if (userId && typeof userId.toString === 'function') {
+                userIdString = userId.toString();
+            } else if (userId && userId.toHexString) {
+                // ObjectId has toHexString method
+                userIdString = userId.toHexString();
+            } else {
+                console.error('Invalid userId format for fetchMessages:', userId);
+                return;
+            }
+
+            // Validate it's a proper ObjectId format (24 hex characters)
             if (!/^[0-9a-fA-F]{24}$/.test(userIdString)) {
-                console.error('Invalid userId format for fetchMessages:', userIdString);
+                console.error('Invalid userId format after extraction:', userIdString);
                 return;
             }
 
@@ -122,26 +144,46 @@ const Messages = () => {
         if (!newMessage.trim() || !currentChat) return;
 
         try {
-            // Debug: Log the currentChat object to see its structure
-            console.log('Current chat object:', currentChat);
-            console.log('Current chat _id:', currentChat._id);
-            console.log('Type of _id:', typeof currentChat._id);
-
-            // Multiple fallback methods to extract the actual ID string
+            // Extract receiver ID with comprehensive fallback logic
             let receiverId;
-            if (typeof currentChat._id === 'string') {
-                receiverId = currentChat._id;
-            } else if (currentChat._id && currentChat._id.$oid) {
-                // MongoDB extended JSON format
-                receiverId = currentChat._id.$oid;
-            } else if (currentChat._id && typeof currentChat._id.toString === 'function') {
-                receiverId = currentChat._id.toString();
-            } else if (currentChat._id && currentChat._id.toHexString) {
-                // ObjectId has toHexString method
-                receiverId = currentChat._id.toHexString();
-            } else {
-                // Last resort: try to extract from object
-                receiverId = String(currentChat._id);
+            const idValue = currentChat._id;
+
+            console.log('Current chat object:', currentChat);
+            console.log('Current chat _id:', idValue);
+            console.log('Type of _id:', typeof idValue);
+
+            // Try different extraction methods
+            if (typeof idValue === 'string' && /^[0-9a-fA-F]{24}$/.test(idValue)) {
+                // Already a valid string ID
+                receiverId = idValue;
+            } else if (idValue && typeof idValue === 'object') {
+                // It's an object, try to extract the ID
+                if (idValue.$oid) {
+                    // MongoDB extended JSON format
+                    receiverId = idValue.$oid;
+                } else if (idValue._id) {
+                    // Nested _id property
+                    receiverId = typeof idValue._id === 'string' ? idValue._id : String(idValue._id);
+                } else if (idValue.toHexString && typeof idValue.toHexString === 'function') {
+                    // ObjectId with toHexString method
+                    receiverId = idValue.toHexString();
+                } else if (idValue.toString && typeof idValue.toString === 'function') {
+                    // Try toString, but verify it's not "[object Object]"
+                    const stringValue = idValue.toString();
+                    if (stringValue !== '[object Object]' && /^[0-9a-fA-F]{24}$/.test(stringValue)) {
+                        receiverId = stringValue;
+                    }
+                }
+            }
+
+            // If still not found, try using currentChat's own _id or user._id
+            if (!receiverId || receiverId === '[object Object]') {
+                // Maybe the chat object itself has a user property
+                if (currentChat.user && typeof currentChat.user === 'string') {
+                    receiverId = currentChat.user;
+                } else if (currentChat.user && currentChat.user._id) {
+                    receiverId = typeof currentChat.user._id === 'string' ? currentChat.user._id : String(currentChat.user._id);
+                }
             }
 
             console.log('Extracted receiverId:', receiverId);
@@ -151,6 +193,7 @@ const Messages = () => {
             if (!receiverId || receiverId === '[object Object]' || !/^[0-9a-fA-F]{24}$/.test(receiverId)) {
                 toast.error('Invalid receiver ID. Please try selecting the conversation again.');
                 console.error('Invalid receiverId after extraction:', receiverId);
+                console.error('Full currentChat object:', JSON.stringify(currentChat, null, 2));
                 return;
             }
 

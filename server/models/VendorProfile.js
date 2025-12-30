@@ -126,6 +126,10 @@ const vendorProfileSchema = new mongoose.Schema({
     businessName: {
         type: String,
     },
+    email: {
+        type: String,
+        required: true,
+    },
     contactPhone: {
         type: String,
     },

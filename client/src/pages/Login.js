@@ -43,7 +43,15 @@ const Login = () => {
                 });
                 login(res.data.token, res.data);
                 toast.success('Welcome back!');
-                setTimeout(() => navigate(res.data.role === 'vendor' ? '/vendor-dashboard' : '/dashboard'), 500);
+                setTimeout(() => {
+                    if (res.data.role === 'vendor') {
+                        navigate('/vendor-dashboard');
+                    } else if (res.data.role === 'guest') {
+                        navigate('/guest-dashboard');
+                    } else {
+                        navigate('/dashboard');
+                    }
+                }, 500);
             }
         } catch (err) {
             console.error(err);

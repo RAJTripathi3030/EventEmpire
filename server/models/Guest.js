@@ -20,6 +20,14 @@ const guestSchema = new mongoose.Schema({
     invitedAt: {
         type: Date,
     },
+    rsvpStatus: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected'],
+        default: 'pending',
+    },
+    rsvpDate: {
+        type: Date,
+    },
 });
 
 module.exports = mongoose.model('Guest', guestSchema);

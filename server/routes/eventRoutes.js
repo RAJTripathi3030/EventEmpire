@@ -7,9 +7,14 @@ router.use(protect); // Protect all event routes
 
 router.post('/', async (req, res) => {
     try {
+        console.log('Creating event with data:', req.body);
+        console.log('User ID:', req.user._id);
         const event = await eventService.createEvent(req.body, req.user._id);
         res.status(201).json(event);
     } catch (error) {
+        console.error('Event creation error:', error);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
         res.status(400).json({ message: error.message });
     }
 });

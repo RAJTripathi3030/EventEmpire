@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Alert, Badge, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
@@ -8,6 +8,8 @@ import toast from 'react-hot-toast';
 const VendorBooking = () => {
     const { vendorId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    const eventId = new URLSearchParams(location.search).get('eventId');
     const { user } = useContext(AuthContext);
     const [vendor, setVendor] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -75,6 +77,7 @@ const VendorBooking = () => {
         try {
             // Create booking on backend
             const res = await axios.post('http://localhost:5000/api/bookings/create', {
+                eventId,
                 vendorId: vendor._id,
                 serviceDate: bookingData.serviceDate,
                 selectedPackage: {
@@ -152,6 +155,45 @@ const VendorBooking = () => {
         } catch (err) {
             console.error(err);
             toast.error(err.response?.data?.message || 'Booking failed. Please try again');
+            setSubmitting(false);
+        }
+    };
+
+    const handlePayLater = async () => {
+        if (!user) {
+            toast.error('Please login to book a vendor');
+            navigate('/login');
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            // Create booking on backend
+            // The backend always creates the booking in 'pending' payment status
+            // We just ignore the Razorpay order returned
+            await axios.post('http://localhost:5000/api/bookings/create', {
+                eventId,
+                vendorId: vendor._id,
+                serviceDate: bookingData.serviceDate,
+                selectedPackage: {
+                    packageName: selectedPackage.packageName,
+                    price: selectedPackage.price,
+                    description: selectedPackage.description
+                },
+                numberOfGuests: parseInt(bookingData.numberOfGuests),
+                venue: bookingData.venue,
+                specialRequests: bookingData.specialRequests
+            }, config);
+
+            setSubmitting(false);
+            setShowBookingModal(false);
+            toast.success('Booking confirmed! You can pay later from the Event Page.');
+            navigate('/dashboard');
+
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.message || 'Booking failed');
             setSubmitting(false);
         }
     };
@@ -261,16 +303,7 @@ const VendorBooking = () => {
                                 <div className="mb-3">
                                     <strong className="d-block mb-2">Contact</strong>
                                     <p className="mb-1"><i className="bi bi-telephone me-2"></i> {vendor.contactPhone || 'Not provided'}</p>
-                                    <p className="mb-0"><i className="bi bi-envelope me-2"></i> {vendor.userDetails?.email || 'Not provided'}</p>
-                                </div>
-
-                                <hr />
-
-                                <div className="mb-3">
-                                    <strong className="d-block mb-2">Price Range</strong>
-                                    <p className="text-warning fw-bold mb-0">
-                                        ₹{vendor.minPackagePrice?.toLocaleString()} - ₹{vendor.maxPackagePrice?.toLocaleString()}
-                                    </p>
+                                    <p className="mb-0"><i className="bi bi-envelope me-2"></i> {vendor.user?.email || vendor.userDetails?.email || 'Not provided'}</p>
                                 </div>
 
                                 <hr />
@@ -278,7 +311,15 @@ const VendorBooking = () => {
                                 <Button
                                     variant="outline-warning"
                                     className="w-100 mb-2"
-                                    onClick={() => navigate(`/messages?chatWith=${vendor.user || vendor._id}`)}
+                                    onClick={() => {
+                                        const targetId = vendor.user?._id || vendor.user;
+                                        if (typeof targetId === 'object') {
+                                            // Fallback if _id is also an object (rare but possible with some drivers)
+                                            navigate(`/messages?chatWith=${targetId.toString()}`);
+                                        } else {
+                                            navigate(`/messages?chatWith=${targetId}`);
+                                        }
+                                    }}
                                 >
                                     <i className="bi bi-chat me-2"></i> Message Vendor
                                 </Button>
@@ -350,23 +391,33 @@ const VendorBooking = () => {
                                 />
                             </Form.Group>
 
-                            <div className="d-flex justify-content-between align-items-center">
+                            <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
                                 <Button variant="secondary" onClick={() => setShowBookingModal(false)} disabled={submitting}>
                                     Cancel
                                 </Button>
-                                <Button type="submit" className="btn-royal-gold" disabled={submitting}>
-                                    {submitting ? (
-                                        <>
-                                            <span className="spinner-border spinner-border-sm me-2"></span>
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <i className="bi bi-credit-card me-2"></i>
-                                            Proceed to Payment
-                                        </>
-                                    )}
-                                </Button>
+                                <div className="d-flex gap-2">
+                                    <Button
+                                        variant="outline-primary"
+                                        onClick={handlePayLater}
+                                        disabled={submitting}
+                                    >
+                                        <i className="bi bi-clock-history me-2"></i>
+                                        Book & Pay Later
+                                    </Button>
+                                    <Button type="submit" className="btn-royal-gold" disabled={submitting}>
+                                        {submitting ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2"></span>
+                                                Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="bi bi-credit-card me-2"></i>
+                                                Pay Now
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
                         </Form>
                     </Modal.Body>

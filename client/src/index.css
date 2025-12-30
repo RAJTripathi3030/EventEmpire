@@ -357,3 +357,29 @@ a:hover {
 .moment-card:hover .moment-overlay {
     transform: translateY(-10px);
 }
+
+/* Testimonials Marquee Animation */
+@keyframes scroll-testimonials {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.testimonials-marquee {
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+}
+
+.testimonials-track {
+    display: flex;
+    animation: scroll-testimonials 40s linear infinite;
+    gap: 2rem;
+}
+
+.testimonials-track:hover {
+    animation-play-state: paused;
+}

@@ -18,6 +18,7 @@ const UserDashboard = () => {
         type: '',
         description: '',
         organizerName: '',
+        thumbnail: ''
     });
     const [message, setMessage] = useState(null);
     const [vendorCount, setVendorCount] = useState(0);
@@ -168,7 +169,7 @@ const UserDashboard = () => {
                                 <Button className="w-100 mb-2 btn-royal-gold shadow-sm" onClick={() => setOpen(true)}>
                                     <i className="bi bi-plus-lg me-2"></i> Create Event
                                 </Button>
-                                <Button className="w-100 btn-glass shadow-sm text-dark border-0" onClick={() => navigate('/vendors')} style={{ background: '#f8f9fa' }}>
+                                <Button className="w-100 btn-glass shadow-sm text-dark border-0" onClick={() => navigate('/find-vendors')} style={{ background: '#f8f9fa' }}>
                                     <i className="bi bi-search me-2"></i> Find Vendors
                                 </Button>
                             </div>
@@ -196,7 +197,9 @@ const UserDashboard = () => {
                                 <div className="glass-card h-100 d-flex flex-column bg-white border-0 shadow-lg scale-hover" style={{ transition: 'transform 0.3s' }}>
                                     <div style={{
                                         height: '180px',
-                                        background: 'linear-gradient(135deg, #FFC107 0%, #FF9800 100%)',
+                                        background: event.thumbnail ? `url(${event.thumbnail})` : 'linear-gradient(135deg, #FFC107 0%, #FF9800 100%)',
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -205,8 +208,12 @@ const UserDashboard = () => {
                                         position: 'relative',
                                         overflow: 'hidden'
                                     }}>
-                                        <div className="pattern-overlay opacity-25"></div>
-                                        <i className="bi bi-stars display-1 text-white opacity-50"></i>
+                                        {!event.thumbnail && (
+                                            <>
+                                                <div className="pattern-overlay opacity-25"></div>
+                                                <i className="bi bi-stars display-1 text-white opacity-50"></i>
+                                            </>
+                                        )}
                                     </div>
                                     <div className="p-3 flex-grow-1 text-dark">
                                         <h4 className="fw-bold mb-2 text-truncate" style={{ fontFamily: 'Playfair Display', color: 'var(--royal-accent)' }}>{event.name}</h4>
@@ -283,6 +290,27 @@ const UserDashboard = () => {
                             <Form.Group className="mb-3">
                                 <Form.Label className="text-muted small fw-bold">Description</Form.Label>
                                 <Form.Control as="textarea" rows={3} value={newEvent.description} onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })} className="form-control-glass bg-light" />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label className="text-muted small fw-bold">Event Thumbnail (Optional)</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                setNewEvent({ ...newEvent, thumbnail: reader.result });
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                    className="form-control-glass bg-light"
+                                />
+                                <Form.Text className="text-muted small">
+                                    Upload an image to represent your event
+                                </Form.Text>
                             </Form.Group>
                         </Form>
                     </Modal.Body>

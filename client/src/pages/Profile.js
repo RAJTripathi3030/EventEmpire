@@ -7,6 +7,7 @@ const Profile = () => {
     const { user, updateUser } = useContext(AuthContext);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [message, setMessage] = useState(null);
     const token = localStorage.getItem('token');
 
@@ -14,13 +15,14 @@ const Profile = () => {
         if (user) {
             setName(user.name);
             setEmail(user.email);
+            setPhone(user.phone || '');
         }
     }, [user]);
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.put('http://localhost:5000/api/auth/profile', { name, email }, {
+            const res = await axios.put('http://localhost:5000/api/auth/profile', { name, phone }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             updateUser(res.data);
@@ -69,6 +71,16 @@ const Profile = () => {
                             <Form.Text className="text-muted small">
                                 Email address cannot be changed for security reasons.
                             </Form.Text>
+                        </Form.Group>
+                        <Form.Group className="mb-4">
+                            <Form.Label className="text-muted fw-bold small">Phone Number</Form.Label>
+                            <Form.Control
+                                type="tel"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                className="form-control-glass bg-light"
+                                placeholder="Enter your phone number"
+                            />
                         </Form.Group>
                         <div className="d-grid mt-5">
                             <Button type="submit" className="btn-royal-gold py-2 fs-5 shadow-sm">

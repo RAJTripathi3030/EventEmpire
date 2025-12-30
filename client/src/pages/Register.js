@@ -26,7 +26,13 @@ const Register = () => {
             toast.success('Registration successful! Welcome to EventEmpire!');
             login(res.data.token, res.data);
             setTimeout(() => {
-                navigate(res.data.role === 'vendor' ? '/vendor-dashboard' : '/dashboard');
+                if (res.data.role === 'vendor') {
+                    navigate('/vendor-dashboard');
+                } else if (res.data.role === 'guest') {
+                    navigate('/guest-dashboard');
+                } else {
+                    navigate('/dashboard');
+                }
             }, 500);
         } catch (err) {
             console.error(err);
@@ -114,6 +120,7 @@ const Register = () => {
                             >
                                 <option value="user">User (Planning an Event)</option>
                                 <option value="vendor">Vendor (Offering Services)</option>
+                                <option value="guest">Guest (Invited to Events)</option>
                                 <option value="admin">Admin (Management)</option>
                             </Form.Select>
                         </Form.Group>

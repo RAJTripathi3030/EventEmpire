@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Tab, Nav, Button, Form, Modal, ListGroup, Alert, ProgressBar, Table, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import PaymentManagement from '../components/PaymentManagement';
 
 const EventPage = () => {
     const { id } = useParams();
@@ -33,13 +34,25 @@ const EventPage = () => {
 
     // Budget State
     const [totalBudget, setTotalBudget] = useState(0);
-    const [newExpense, setNewExpense] = useState({ title: '', amount: '', category: '' });
+    const [newExpense, setNewExpense] = useState({ title: '', amount: '', category: '', status: 'pending' });
     const [showBudgetModal, setShowBudgetModal] = useState(false);
+
+    // Vendor Payment State
+    const [bookings, setBookings] = useState([]);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [paymentData, setPaymentData] = useState({
+        amount: '',
+        paymentType: 'partial',
+        paymentMethod: 'online',
+        notes: ''
+    });
 
     useEffect(() => {
         fetchEventDetails();
         fetchGuests();
         fetchBudgetDetails();
+        fetchBookings();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
@@ -90,6 +103,35 @@ const EventPage = () => {
         } catch (err) {
             console.error("Error fetching budget:", err);
         }
+    };
+
+    const fetchBookings = async () => {
+        try {
+            const res = await axios.get(`http://localhost:5000/api/bookings?eventId=${id}`, config);
+            setBookings(res.data);
+        } catch (err) {
+            console.error("Error fetching bookings:", err);
+        }
+    };
+
+    const handleMakePayment = async () => {
+        try {
+            await axios.post(`http://localhost:5000/api/vendor-payments/${selectedBooking._id}`, paymentData, config);
+            setShowPaymentModal(false);
+            setPaymentData({ amount: '', paymentType: 'partial', paymentMethod: 'online', notes: '' });
+            fetchBookings();
+            setMessage({ type: 'success', text: 'Payment recorded successfully!' });
+        } catch (err) {
+            console.error(err);
+            setMessage({ type: 'danger', text: 'Error recording payment' });
+        }
+    };
+
+    const openPaymentModal = (booking) => {
+        setSelectedBooking(booking);
+        const remaining = booking.totalAmount - (booking.totalPaid || 0);
+        setPaymentData({ ...paymentData, amount: remaining });
+        setShowPaymentModal(true);
     };
 
     const handleUpdateEvent = async () => {
@@ -151,6 +193,33 @@ const EventPage = () => {
         }
     };
 
+    const handleUpdateExpenseStatus = async (expenseId, newStatus) => {
+        try {
+            const res = await axios.put(`http://localhost:5000/api/budget/${id}/expense/${expenseId}/status`, {
+                status: newStatus
+            }, config);
+
+            setBudget(res.data.budget);
+            setMessage({ type: 'success', text: `Status updated to ${newStatus}` });
+        } catch (err) {
+            console.error(err);
+            setMessage({ type: 'danger', text: 'Error updating expense status' });
+        }
+    };
+
+    const handleDeleteExpense = async (expenseId) => {
+        if (!window.confirm('Are you sure you want to delete this expense?')) return;
+
+        try {
+            const res = await axios.delete(`http://localhost:5000/api/budget/${id}/expense/${expenseId}`, config);
+            setBudget(res.data.budget);
+            setMessage({ type: 'success', text: 'Expense deleted successfully' });
+        } catch (err) {
+            console.error(err);
+            setMessage({ type: 'danger', text: 'Error deleting expense' });
+        }
+    };
+
     if (loading) return <Container className="mt-4 text-center"><div className="spinner-border text-primary" role="status"></div></Container>;
     if (!event) return <Container className="mt-4 text-center"><h3>Event not found</h3></Container>;
 
@@ -192,6 +261,11 @@ const EventPage = () => {
                         </Nav.Item>
                         <Nav.Item>
                             <Nav.Link eventKey="budget" className="text-dark fw-bold mx-2">Budget</Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey="payments" className="text-dark fw-bold mx-2">
+                                <i className="bi bi-credit-card me-1"></i>Vendor Payments
+                            </Nav.Link>
                         </Nav.Item>
                     </Nav>
 
@@ -249,9 +323,18 @@ const EventPage = () => {
                                                         <span className="small text-muted">{guest.email}</span>
                                                     </div>
                                                 </div>
-                                                <Badge bg={guest.isInvited ? 'success' : 'secondary'} pill>
-                                                    {guest.isInvited ? 'Invited' : 'Pending'}
-                                                </Badge>
+                                                <div className="d-flex gap-2 align-items-center">
+                                                    <Badge bg={
+                                                        guest.rsvpStatus === 'accepted' ? 'success' :
+                                                            guest.rsvpStatus === 'rejected' ? 'danger' :
+                                                                'secondary'
+                                                    } pill>
+                                                        {guest.rsvpStatus === 'accepted' ? 'Accepted' :
+                                                            guest.rsvpStatus === 'rejected' ? 'Declined' :
+                                                                'Pending'}
+                                                    </Badge>
+                                                    {guest.isInvited && <Badge bg="info" pill>Invited</Badge>}
+                                                </div>
                                             </ListGroup.Item>
                                         ))
                                     )}
@@ -306,7 +389,9 @@ const EventPage = () => {
                                         <tr>
                                             <th>Title</th>
                                             <th>Category</th>
+                                            <th>Status</th>
                                             <th className="text-end">Amount</th>
+                                            <th className="text-center">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -315,17 +400,60 @@ const EventPage = () => {
                                                 <tr key={index}>
                                                     <td className="fw-medium">{expense.title}</td>
                                                     <td><Badge bg="info" className="text-dark bg-opacity-25 border border-info">{expense.category}</Badge></td>
+                                                    <td>
+                                                        <Form.Select
+                                                            size="sm"
+                                                            value={expense.status || 'pending'}
+                                                            onChange={(e) => handleUpdateExpenseStatus(expense._id, e.target.value)}
+                                                            className="w-auto"
+                                                            style={{
+                                                                backgroundColor: expense.status === 'completed' ? '#d1e7dd' :
+                                                                    expense.status === 'paid' ? '#cfe2ff' :
+                                                                        expense.status === 'partially_done' ? '#fff3cd' : '#f8f9fa',
+                                                                border: `1px solid ${expense.status === 'completed' ? '#198754' :
+                                                                    expense.status === 'paid' ? '#0d6efd' :
+                                                                        expense.status === 'partially_done' ? '#ffc107' : '#6c757d'}`,
+                                                                fontWeight: '500'
+                                                            }}
+                                                        >
+                                                            <option value="pending">Pending</option>
+                                                            <option value="partially_done">Partially Done</option>
+                                                            <option value="paid">Paid</option>
+                                                            <option value="completed">Completed</option>
+                                                        </Form.Select>
+                                                    </td>
                                                     <td className="text-end fw-bold text-dark">₹{expense.amount.toFixed(2)}</td>
+                                                    <td className="text-center">
+                                                        <Button
+                                                            variant="outline-danger"
+                                                            size="sm"
+                                                            onClick={() => handleDeleteExpense(expense._id)}
+                                                        >
+                                                            <i className="bi bi-trash"></i>
+                                                        </Button>
+                                                    </td>
                                                 </tr>
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="3" className="text-center text-muted py-4">No expenses recorded yet.</td>
+                                                <td colSpan="5" className="text-center text-muted py-4">No expenses recorded yet.</td>
                                             </tr>
                                         )}
                                     </tbody>
                                 </Table>
                             </div>
+                        </Tab.Pane>
+
+                        <Tab.Pane eventKey="payments">
+                            <div className="d-flex justify-content-end mb-3">
+                                <Button
+                                    className="btn-royal-gold"
+                                    onClick={() => navigate(`/find-vendors?eventId=${id}`)}
+                                >
+                                    <i className="bi bi-person-plus me-2"></i>Find New Vendor
+                                </Button>
+                            </div>
+                            <PaymentManagement eventId={id} />
                         </Tab.Pane>
                     </Tab.Content>
                 </Tab.Container>
@@ -423,6 +551,14 @@ const EventPage = () => {
                             <Form.Group className="mb-3">
                                 <Form.Label className="text-muted small fw-bold">Amount (₹)</Form.Label>
                                 <Form.Control type="number" value={newExpense.amount} onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })} className="form-control-glass bg-light" required placeholder="0.00" />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label className="text-muted small fw-bold">Status</Form.Label>
+                                <Form.Select value={newExpense.status} onChange={(e) => setNewExpense({ ...newExpense, status: e.target.value })} className="form-control-glass bg-light">
+                                    <option value="pending">Pending</option>
+                                    <option value="partially_done">Partially Done</option>
+                                    <option value="completed">Completed</option>
+                                </Form.Select>
                             </Form.Group>
                             <div className="d-flex justify-content-end gap-2 mt-4">
                                 <Button variant="link" className="text-muted text-decoration-none" onClick={() => setShowBudgetModal(false)}>Cancel</Button>

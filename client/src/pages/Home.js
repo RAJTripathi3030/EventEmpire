@@ -11,17 +11,20 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 // Import local assets for offline capability
-import heroWedding from '../assets/hero_wedding.gif';
-import heroParty from '../assets/hero_party.gif';
-import heroGraduation from '../assets/hero_graduation.gif';
+// Import local assets for offline capability
 import momentCorporate from '../assets/moment_corporate.jpg';
 import momentBirthday from '../assets/moment_birthday.jpg';
 import momentReception from '../assets/moment_reception.jpg';
 import momentStage from '../assets/moment_stage.jpg';
-import momentWeddingVideo from '../assets/moment_wedding.mp4';
-import momentConcertVideo from '../assets/moment_concert.mp4';
-import momentFestivalVideo from '../assets/moment_festival.mp4';
+import momentWedding from '../assets/moment_wedding.png';
+import momentConcert from '../assets/moment_concert.png';
+import momentFestival from '../assets/moment_festival.png';
 import ctaCelebration from '../assets/cta_celebration.gif';
+
+// Hero Images
+import heroWedding from '../assets/hero_wedding.jpg';
+import heroParty from '../assets/hero_party.jpg';
+import heroGraduation from '../assets/hero_graduation.jpg';
 
 const Home = () => {
     const [stats, setStats] = useState({ users: 0, vendors: 0, events: 0 });
@@ -241,11 +244,11 @@ const Home = () => {
                     >
                         {[
                             { type: 'image', src: momentCorporate, title: 'Corporate Galas', subtitle: 'Professional events with impact' },
-                            { type: 'video', src: momentWeddingVideo, title: 'Dream Weddings', subtitle: 'Unforgettable ceremonies' },
+                            { type: 'image', src: momentWedding, title: 'Dream Weddings', subtitle: 'Unforgettable ceremonies' },
                             { type: 'image', src: momentBirthday, title: 'Birthday Celebrations', subtitle: 'Making milestones memorable' },
-                            { type: 'video', src: momentConcertVideo, title: 'Live Concerts', subtitle: 'Energetic performances' },
+                            { type: 'image', src: momentConcert, title: 'Live Concerts', subtitle: 'Energetic performances' },
                             { type: 'image', src: momentReception, title: 'Grand Receptions', subtitle: 'Elegant gatherings' },
-                            { type: 'video', src: momentFestivalVideo, title: 'Festival Parties', subtitle: 'Vibrant celebrations' },
+                            { type: 'image', src: momentFestival, title: 'Festival Parties', subtitle: 'Vibrant celebrations' },
                             { type: 'image', src: momentStage, title: 'Stage Productions', subtitle: 'Theatrical excellence' },
                         ].map((moment, idx) => (
                             <SwiperSlide key={idx}>
@@ -283,21 +286,31 @@ const Home = () => {
             </section>
 
             {/* Testimonials */}
-            <section className="py-5 my-5">
+            <section className="py-5 my-5 overflow-hidden">
                 <Container>
                     <div className="text-center mb-5">
                         <h2 className="display-4 fw-bold mb-3" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display' }}>What Our Users Say</h2>
                         <p className="fs-5 text-muted">Join thousands of happy event planners</p>
                     </div>
 
-                    <Row className="g-4">
-                        {[
-                            { name: 'Priya Sharma', role: 'Bride, Mumbai', text: 'EventEmpire made planning my wedding an absolute breeze. The budget tracker saved me from overspending, and I found the perfect vendors through their marketplace!', avatar: '👰' },
-                            { name: 'Rajesh Kumar', role: 'Corporate Event Manager', text: 'Managing multiple company events used to be chaos. Now everything is organized in one place. The collaboration features are a game-changer!', avatar: '👨‍💼' },
-                            { name: 'Anjali Patel', role: 'Birthday Mom, Delhi', text: 'Planned my daughter\'s sweet 16 using EventEmpire. The guest list management and RSVP tracking made everything so simple. Highly recommend!', avatar: '👩‍👧' }
-                        ].map((testimonial, idx) => (
-                            <Col md={4} key={idx}>
-                                <div className="glass-card h-100 p-4">
+                    <div className="testimonials-marquee">
+                        <div className="testimonials-track">
+                            {[
+                                { name: 'Priya Sharma', role: 'Bride, Mumbai', text: 'EventEmpire made planning my wedding an absolute breeze. The budget tracker saved me from overspending!', avatar: '👰' },
+                                { name: 'Rajesh Kumar', role: 'Corporate Event Manager', text: 'Managing multiple company events used to be chaos. Now everything is organized in one place!', avatar: '👨‍💼' },
+                                { name: 'Anjali Patel', role: 'Birthday Mom, Delhi', text: 'Planned my daughter\'s sweet 16 using EventEmpire. The guest list management made everything so simple!', avatar: '👩‍👧' },
+                                { name: 'Vikram Singh', role: 'Wedding Planner', text: 'As a professional planner, this tool has revolutionized how I work with clients. Highly recommended!', avatar: '🤵' },
+                                { name: 'Meera Reddy', role: 'Event Organizer', text: 'The vendor marketplace is fantastic! Found the perfect caterer and photographer in minutes.', avatar: '👩‍💼' },
+                                { name: 'Arjun Mehta', role: 'Groom, Bangalore', text: 'The RSVP tracking feature was a lifesaver. We always knew exactly how many guests were coming.', avatar: '🤵‍♂️' },
+                                // Duplicate for seamless loop
+                                { name: 'Priya Sharma', role: 'Bride, Mumbai', text: 'EventEmpire made planning my wedding an absolute breeze. The budget tracker saved me from overspending!', avatar: '👰' },
+                                { name: 'Rajesh Kumar', role: 'Corporate Event Manager', text: 'Managing multiple company events used to be chaos. Now everything is organized in one place!', avatar: '👨‍💼' },
+                                { name: 'Anjali Patel', role: 'Birthday Mom, Delhi', text: 'Planned my daughter\'s sweet 16 using EventEmpire. The guest list management made everything so simple!', avatar: '👩‍👧' },
+                                { name: 'Vikram Singh', role: 'Wedding Planner', text: 'As a professional planner, this tool has revolutionized how I work with clients. Highly recommended!', avatar: '🤵' },
+                                { name: 'Meera Reddy', role: 'Event Organizer', text: 'The vendor marketplace is fantastic! Found the perfect caterer and photographer in minutes.', avatar: '👩‍💼' },
+                                { name: 'Arjun Mehta', role: 'Groom, Bangalore', text: 'The RSVP tracking feature was a lifesaver. We always knew exactly how many guests were coming.', avatar: '🤵‍♂️' },
+                            ].map((testimonial, idx) => (
+                                <div key={idx} className="glass-card p-4" style={{ minWidth: '350px', maxWidth: '350px' }}>
                                     <div className="text-center mb-3">
                                         <div className="display-1 mb-2">{testimonial.avatar}</div>
                                         <h5 className="fw-bold mb-1" style={{ color: 'var(--text-primary)' }}>{testimonial.name}</h5>
@@ -312,9 +325,9 @@ const Home = () => {
                                         <i className="bi bi-star-fill"></i>
                                     </div>
                                 </div>
-                            </Col>
-                        ))}
-                    </Row>
+                            ))}
+                        </div>
+                    </div>
                 </Container>
             </section>
 

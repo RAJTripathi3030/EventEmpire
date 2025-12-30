@@ -17,6 +17,8 @@ import Messages from './pages/Messages';
 import Profile from './pages/Profile';
 import ForgotPassword from './pages/ForgotPassword';
 import VendorRegistration from './pages/VendorRegistration';
+import GuestLogin from './pages/GuestLogin';
+import GuestDashboard from './pages/GuestDashboard';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import { AuthProvider } from './context/AuthContext';
@@ -35,6 +37,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/guest-rsvp" element={<GuestLogin />} />
 
                     {/* Protected Routes */}
                     <Route path="/dashboard" element={<PrivateRoute roles={['user']}><UserDashboard /></PrivateRoute>} />
@@ -44,8 +47,9 @@ function App() {
                     <Route path="/messages" element={<PrivateRoute roles={['user', 'vendor']}><Messages /></PrivateRoute>} />
                     <Route path="/vendor-dashboard" element={<PrivateRoute roles={['vendor']}><VendorDashboard /></PrivateRoute>} />
                     <Route path="/vendor-registration" element={<PrivateRoute roles={['vendor']}><VendorRegistration /></PrivateRoute>} />
+                    <Route path="/guest-dashboard" element={<PrivateRoute roles={['guest']}><GuestDashboard /></PrivateRoute>} />
                     <Route path="/admin-dashboard" element={<PrivateRoute roles={['admin']}><AdminDashboard /></PrivateRoute>} />
-                    <Route path="/profile" element={<PrivateRoute roles={['user', 'vendor', 'admin']}><Profile /></PrivateRoute>} />
+                    <Route path="/profile" element={<PrivateRoute roles={['user', 'vendor', 'admin', 'guest']}><Profile /></PrivateRoute>} />
                 </Routes>
             </Router>
         </AuthProvider>

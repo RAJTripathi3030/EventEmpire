@@ -36,6 +36,9 @@ const eventSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    thumbnail: {
+        type: String, // URL or base64 encoded image
+    },
     createdAt: {
         type: Date,
         default: Date.now,

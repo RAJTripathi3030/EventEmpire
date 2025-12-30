@@ -46,4 +46,35 @@ const addExpense = async (eventId, expenseData, userId) => {
     return { budget, alert, remaining };
 };
 
-module.exports = { getBudget, updateBudget, addExpense };
+const updateExpenseStatus = async (eventId, expenseId, newStatus, userId) => {
+    const event = await Event.findById(eventId);
+    if (!event) throw new Error('Event not found');
+    if (event.user.toString() !== userId.toString()) throw new Error('Not authorized');
+
+    const budget = await Budget.findOne({ event: eventId });
+    if (!budget) throw new Error('Budget not found');
+
+    const expense = budget.expenses.id(expenseId);
+    if (!expense) throw new Error('Expense not found');
+
+    expense.status = newStatus;
+    await budget.save();
+
+    return { budget, message: 'Expense status updated successfully' };
+};
+
+const deleteExpense = async (eventId, expenseId, userId) => {
+    const event = await Event.findById(eventId);
+    if (!event) throw new Error('Event not found');
+    if (event.user.toString() !== userId.toString()) throw new Error('Not authorized');
+
+    const budget = await Budget.findOne({ event: eventId });
+    if (!budget) throw new Error('Budget not found');
+
+    budget.expenses.pull(expenseId);
+    await budget.save();
+
+    return { budget, message: 'Expense deleted successfully' };
+};
+
+module.exports = { getBudget, updateBudget, addExpense, updateExpenseStatus, deleteExpense };

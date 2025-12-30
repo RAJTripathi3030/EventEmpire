@@ -17,8 +17,11 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'vendor', 'admin'],
+        enum: ['user', 'vendor', 'admin', 'guest'],
         default: 'user',
+    },
+    phone: {
+        type: String,
     },
     otp: {
         type: String,

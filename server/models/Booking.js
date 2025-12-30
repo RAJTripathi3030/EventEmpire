@@ -112,6 +112,16 @@ const bookingSchema = new mongoose.Schema({
         enum: ['not_started', 'confirmed', 'in_preparation', 'in_progress', 'completed', 'cancelled'],
         default: 'not_started'
     },
+    workProgress: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 100
+    },
+    totalPaid: {
+        type: Number,
+        default: 0
+    },
     progressUpdates: [{
         status: String,
         note: String,

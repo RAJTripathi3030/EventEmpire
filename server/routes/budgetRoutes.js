@@ -32,4 +32,24 @@ router.post('/:eventId/expense', async (req, res) => {
     }
 });
 
+// Update expense status
+router.put('/:eventId/expense/:expenseId/status', async (req, res) => {
+    try {
+        const result = await budgetService.updateExpenseStatus(req.params.eventId, req.params.expenseId, req.body.status, req.user._id);
+        res.json(result);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+// Delete expense
+router.delete('/:eventId/expense/:expenseId', async (req, res) => {
+    try {
+        const result = await budgetService.deleteExpense(req.params.eventId, req.params.expenseId, req.user._id);
+        res.json(result);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
 module.exports = router;

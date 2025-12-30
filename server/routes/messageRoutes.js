@@ -16,6 +16,10 @@ router.post('/', async (req, res) => {
         return res.status(400).json({ message: 'Receiver ID and content are required' });
     }
 
+    if (!mongoose.Types.ObjectId.isValid(receiverId)) {
+        return res.status(400).json({ message: 'Invalid Receiver ID' });
+    }
+
     try {
         const message = await Message.create({
             sender: req.user._id,
@@ -95,6 +99,9 @@ router.delete('/conversations/:userId', async (req, res) => {
 
 // Get messages with a specific user
 router.get('/:userId', async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
+        return res.status(400).json({ message: 'Invalid User ID' });
+    }
     try {
         const messages = await Message.find({
             $or: [

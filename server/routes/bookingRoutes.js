@@ -15,6 +15,8 @@ router.use(authMiddleware.protect);
  */
 router.post('/create', validateBudget, async (req, res) => {
     try {
+        console.log('Received Booking Request:', JSON.stringify(req.body, null, 2));
+
         const bookingData = {
             ...req.body,
             userId: req.user._id
@@ -37,7 +39,8 @@ router.post('/create', validateBudget, async (req, res) => {
         console.error('Create booking error:', error);
         res.status(400).json({
             success: false,
-            message: error.message
+            message: error.message,
+            stack: error.stack // Optional: for debugging
         });
     }
 });
@@ -74,7 +77,8 @@ router.get('/', async (req, res) => {
     try {
         const filters = {
             status: req.query.status,
-            paymentStatus: req.query.paymentStatus
+            paymentStatus: req.query.paymentStatus,
+            event: req.query.eventId
         };
 
         const bookings = await bookingService.getUserBookings(req.user._id, filters);
@@ -116,6 +120,28 @@ router.get('/:id', async (req, res) => {
             booking
         });
     } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+/**
+ * GET /api/bookings/vendor/list
+ * Get bookings for the current vendor
+ */
+router.get('/vendor/list', async (req, res) => {
+    try {
+        const bookings = await bookingService.getVendorBookings(req.user._id);
+
+        res.json({
+            success: true,
+            count: bookings.length,
+            bookings
+        });
+    } catch (error) {
+        console.error('Get vendor bookings error:', error);
         res.status(500).json({
             success: false,
             message: error.message

@@ -20,6 +20,11 @@ const budgetSchema = new mongoose.Schema({
                 enum: ['Venue', 'Catering', 'Decoration', 'Entertainment', 'Other'],
                 default: 'Other',
             },
+            status: {
+                type: String,
+                enum: ['pending', 'partially_done', 'paid', 'completed'],
+                default: 'pending',
+            },
             date: { type: Date, default: Date.now },
         },
     ],

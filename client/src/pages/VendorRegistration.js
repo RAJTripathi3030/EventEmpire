@@ -14,6 +14,7 @@ const VendorRegistration = () => {
     // Form state with all vendor details
     const [formData, setFormData] = useState({
         businessName: '',
+        email: '',
         serviceType: '',
         description: '',
         contactPhone: '',
@@ -50,6 +51,7 @@ const VendorRegistration = () => {
                     // Pre-fill form with existing data
                     setFormData({
                         businessName: res.data.businessName || '',
+                        email: res.data.email || '',
                         serviceType: res.data.serviceType || '',
                         description: res.data.description || '',
                         contactPhone: res.data.contactPhone || '',
@@ -257,6 +259,23 @@ const VendorRegistration = () => {
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
+                                            <Form.Label className="fw-bold">Business Email *</Form.Label>
+                                            <Form.Control
+                                                type="email"
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={handleInputChange}
+                                                placeholder="business@example.com"
+                                                required
+                                                className="form-control-glass bg-light"
+                                            />
+                                            <Form.Text className="text-muted small">
+                                                This email will be visible to clients for inquiries
+                                            </Form.Text>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
                                             <Form.Label className="fw-bold">Contact Phone *</Form.Label>
                                             <Form.Control
                                                 type="tel"
@@ -269,6 +288,9 @@ const VendorRegistration = () => {
                                             />
                                         </Form.Group>
                                     </Col>
+                                </Row>
+
+                                <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
                                             <Form.Label className="fw-bold">Years of Experience *</Form.Label>
@@ -530,7 +552,7 @@ const VendorRegistration = () => {
                     </Card.Body>
                 </Card>
             </Container>
-        </div>
+        </div >
     );
 };
 

@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const vendorService = require('../services/vendorService');
-const { protect, authorize } = require('../middleware/roleMiddleware'); // Need to fix import path
+const { protect, authorize } = require('../middleware/roleMiddleware');
 const authMiddleware = require('../middleware/authMiddleware');
+
+// ============ PUBLIC ROUTES (specific paths first) ============
 
 // Advanced search with all filters (location, price, date, rating)
 router.get('/search/advanced', async (req, res) => {
@@ -41,31 +43,27 @@ router.get('/search/advanced', async (req, res) => {
 // Public route to search vendors (basic search)
 router.get('/search', async (req, res) => {
     try {
-        const vendors = await vendorService.searchVendors(req.query);
-        res.json(vendors);
+        const result = await vendorService.searchVendors(req.query);
+        res.json(result);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
 
-// Public route to get a single vendor by ID
-router.get('/:id', async (req, res) => {
+// ============ PROTECTED ROUTES (specific paths) ============
+
+// Get vendor's own profile (protected)
+router.get('/profile', authMiddleware.protect, async (req, res) => {
     try {
-        const vendor = await vendorService.getVendorById(req.params.id);
-        if (!vendor) {
-            return res.status(404).json({ message: 'Vendor not found' });
-        }
-        res.json(vendor);
+        const profile = await vendorService.getVendorProfile(req.user._id);
+        res.json(profile);
     } catch (error) {
-        console.error('Get vendor by ID error:', error);
         res.status(500).json({ message: error.message });
     }
 });
 
-// Protected routes
-router.use(authMiddleware.protect);
-
-router.post('/profile', async (req, res) => {
+// Create or update vendor profile (protected)
+router.post('/profile', authMiddleware.protect, async (req, res) => {
     // Ensure user is a vendor
     if (req.user.role !== 'vendor') {
         return res.status(403).json({ message: 'Only vendors can create a profile' });
@@ -78,7 +76,8 @@ router.post('/profile', async (req, res) => {
     }
 });
 
-router.post('/portfolio', async (req, res) => {
+// Add portfolio image (protected)
+router.post('/portfolio', authMiddleware.protect, async (req, res) => {
     if (req.user.role !== 'vendor') {
         return res.status(403).json({ message: 'Only vendors can update portfolio' });
     }
@@ -90,11 +89,18 @@ router.post('/portfolio', async (req, res) => {
     }
 });
 
-router.get('/profile', async (req, res) => {
+// ============ PUBLIC PARAMETERIZED ROUTE (MUST BE LAST) ============
+
+// Public route to get a single vendor by ID
+router.get('/:id', async (req, res) => {
     try {
-        const profile = await vendorService.getVendorProfile(req.user._id);
-        res.json(profile);
+        const vendor = await vendorService.getVendorById(req.params.id);
+        if (!vendor) {
+            return res.status(404).json({ message: 'Vendor not found' });
+        }
+        res.json(vendor);
     } catch (error) {
+        console.error('Get vendor by ID error:', error);
         res.status(500).json({ message: error.message });
     }
 });

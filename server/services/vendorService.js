@@ -23,11 +23,14 @@ const getVendorProfile = async (userId) => {
 };
 
 /**
- * Basic search - Simple regex-based filtering
+ * Basic search - Simple regex-based filtering with pagination
  * Used for quick searches without complex filters
  */
 const searchVendors = async (filters) => {
     const query = {};
+    const page = parseInt(filters.page) || 1;
+    const limit = parseInt(filters.limit) || 10;
+    const skip = (page - 1) * limit;
 
     // Location search now uses city field since location is an object
     if (filters.location) {
@@ -38,9 +41,38 @@ const searchVendors = async (filters) => {
         query.serviceType = { $regex: filters.serviceType, $options: 'i' };
     }
 
-    const vendors = await VendorProfile.find(query).populate('user', 'name email');
-    return vendors;
+    // Date-based availability filtering
+    if (filters.date) {
+        const requestedDate = new Date(filters.date);
+        requestedDate.setHours(0, 0, 0, 0);
+
+        query.availabilityDates = {
+            $elemMatch: {
+                date: {
+                    $gte: requestedDate,
+                    $lt: new Date(requestedDate.getTime() + 24 * 60 * 60 * 1000)
+                },
+                status: 'available'
+            }
+        };
+    }
+
+    const total = await VendorProfile.countDocuments(query);
+    const vendors = await VendorProfile.find(query)
+        .populate('user', 'name email')
+        .skip(skip)
+        .limit(limit)
+        .sort({ averageRating: -1, totalReviews: -1 });
+
+    return {
+        vendors,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalVendors: total,
+        limit
+    };
 };
+
 
 /**
  * Advanced Search with MongoDB Aggregation Pipeline

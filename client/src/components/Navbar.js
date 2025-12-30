@@ -12,14 +12,17 @@ const NavigationBar = () => {
         navigate('/');
     };
 
-    const menuItems = !user ? [] : user.role === 'vendor' ? [
-        { label: 'Dashboard', path: '/vendor-dashboard' },
-        { label: 'Messages', path: '/messages' },
-    ] : [
-        { label: 'Dashboard', path: '/dashboard' },
-        { label: 'Find Vendors', path: '/find-vendors' },
-        { label: 'Messages', path: '/messages' },
-    ];
+    const menuItems = !user ? [] :
+        user.role === 'vendor' ? [
+            { label: 'Dashboard', path: '/vendor-dashboard' },
+            { label: 'Messages', path: '/messages' },
+        ] : user.role === 'guest' ? [
+            { label: 'Dashboard', path: '/guest-dashboard' },
+        ] : [
+            { label: 'Dashboard', path: '/dashboard' },
+            { label: 'Find Vendors', path: '/find-vendors' },
+            { label: 'Messages', path: '/messages' },
+        ];
 
     return (
         <Navbar expand="lg" className="glass-nav mb-0 sticky-top py-3">

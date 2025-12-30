@@ -1,6 +1,7 @@
 const Booking = require('../models/Booking');
 const VendorProfile = require('../models/VendorProfile');
 const paymentService = require('./paymentService');
+const mongoose = require('mongoose');
 
 /**
  * Booking Service - Handles booking creation and management
@@ -21,7 +22,7 @@ const paymentService = require('./paymentService');
  * @returns {Promise<Object>} Created booking + Razorpay order details
  */
 const createBooking = async (bookingData) => {
-    const {
+    let {
         userId,
         vendorId,
         eventId,
@@ -32,22 +33,33 @@ const createBooking = async (bookingData) => {
         venue
     } = bookingData;
 
+    // Sanitize Event ID
+    if (!eventId || eventId === '' || !mongoose.Types.ObjectId.isValid(eventId)) {
+        if (eventId) console.warn(`Invalid Event ID: '${eventId}'. Booking will proceed without event link.`);
+        eventId = undefined;
+    }
+
     // Validate vendor exists
     const vendor = await VendorProfile.findById(vendorId);
     if (!vendor) {
+        console.error(`Vendor not found for ID: ${vendorId}`);
         throw new Error('Vendor not found');
     }
+    console.log(`Found vendor: ${vendor.businessName} (${vendor._id})`);
 
-    // Check if vendor is available on requested date
-    const dateAvailability = vendor.availabilityDates.find(avail => {
+    // Check if vendor is explicitly unavailable or booked
+    const dateRecord = vendor.availabilityDates.find(avail => {
         const availDate = new Date(avail.date).toDateString();
         const requestedDate = new Date(serviceDate).toDateString();
-        return availDate === requestedDate && avail.status === 'available';
+        return availDate === requestedDate;
     });
 
-    if (!dateAvailability) {
-        throw new Error('Vendor not available on selected date');
+    if (dateRecord && (dateRecord.status === 'booked' || dateRecord.status === 'unavailable')) {
+        console.error(`Vendor unavailable due to status: ${dateRecord.status} on date ${dateRecord.date}`);
+        throw new Error('Vendor is not available on this date');
     }
+    console.log('Vendor availability check passed (Implicit or Available)');
+    // If no record found, assume available (Implicit Availability)
 
     // Calculate amounts
     const baseAmount = selectedPackage.price;
@@ -153,7 +165,7 @@ const verifyAndUpdatePayment = async (bookingId, paymentData) => {
     await booking.save();
 
     // Update vendor availability (mark date as booked)
-    await VendorProfile.findByIdAndUpdate(
+    const vendor = await VendorProfile.findByIdAndUpdate(
         booking.vendor,
         {
             $set: {
@@ -161,9 +173,30 @@ const verifyAndUpdatePayment = async (bookingId, paymentData) => {
             }
         },
         {
-            arrayFilters: [{ 'elem.date': booking.serviceDate }]
+            arrayFilters: [{ 'elem.date': booking.serviceDate }],
+            new: true
         }
-    );
+    ).populate('user', 'name email');
+
+    // Send payment notification email to vendor
+    try {
+        const emailService = require('./emailService');
+        const User = require('../models/User');
+        const bookingUser = await User.findById(booking.user);
+
+        await emailService.sendPaymentReceivedEmail(vendor.email, {
+            vendorName: vendor.businessName || vendor.user.name,
+            userName: bookingUser.name,
+            amount: paymentDetails.amount / 100, // Convert paise to rupees
+            serviceDate: booking.serviceDate,
+            serviceType: booking.serviceType,
+            bookingId: booking._id
+        });
+        console.log('Payment notification email sent to vendor');
+    } catch (emailError) {
+        console.error('Failed to send payment notification email:', emailError);
+        // Don't throw error - booking is successful even if email fails
+    }
 
     return booking;
 };
@@ -181,6 +214,16 @@ const getUserBookings = async (userId, filters = {}) => {
     if (filters.paymentStatus) {
         query.paymentStatus = filters.paymentStatus;
     }
+
+    if (filters.event) {
+        try {
+            query.event = new mongoose.Types.ObjectId(filters.event);
+        } catch (e) {
+            console.error('Invalid event ID format:', filters.event);
+        }
+    }
+
+    console.log('getUserBookings Query:', JSON.stringify(query, null, 2));
 
     const bookings = await Booking.find(query)
         .populate('vendor', 'serviceType businessName location averageRating')
@@ -217,9 +260,29 @@ const updateVendorProgress = async (bookingId, vendorId, status, note) => {
     return booking;
 };
 
+/**
+ * Get vendor's bookings
+ */
+const getVendorBookings = async (vendorUserId) => {
+    // First find the vendor profile for this user
+    const vendorProfile = await VendorProfile.findOne({ user: vendorUserId });
+
+    if (!vendorProfile) {
+        throw new Error('Vendor profile not found');
+    }
+
+    const bookings = await Booking.find({ vendor: vendorProfile._id })
+        .populate('user', 'name email mobile')
+        .populate('event', 'name date')
+        .sort({ createdAt: -1 });
+
+    return bookings;
+};
+
 module.exports = {
     createBooking,
     verifyAndUpdatePayment,
     getUserBookings,
+    getVendorBookings,
     updateVendorProgress
 };
